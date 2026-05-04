@@ -216,7 +216,7 @@ regenerate another proposal (returns a fresh mock draft) and reject a third
 An Admin user opens User Management to invite a new member, change an existing
 member's role, deactivate a member, and view login history. They open
 Settings to configure API keys for data sources and email-sending platforms,
-set the default approval mode, and adjust spending caps and alert thresholds.
+adjust the AI spending cap, and tune alert thresholds.
 
 **Why this priority**: Without this, the platform is unusable beyond the
 seeded demo accounts — but for the Phase 1 demo to Richbond, Settings can be
@@ -235,7 +235,7 @@ on subsequent loads.
 2. **Given** a Member-role user in the list, **When** the Admin changes their role to Admin and saves, **Then** the change is persisted, logged, and the next login by that user grants Admin privileges.
 3. **Given** an active member, **When** the Admin deactivates them, **Then** that user can no longer authenticate and the deactivation is logged.
 4. **Given** an Admin on Settings, **When** they paste an API key into the email-platform field and save, **Then** subsequent loads of Settings show the key in masked form (e.g., last 4 characters only) and the full key is never returned by any API.
-5. **Given** an Admin on Settings, **When** they change the default approval mode for new campaigns, **Then** the change persists and is logged.
+5. **Given** an Admin on Settings, **When** they adjust the AI spending warning threshold (e.g., from 80% to 75%) and save, **Then** the new threshold persists across page reloads and the change is logged with timestamp, user ID, tenant ID, previous value, and new value.
 
 ---
 
@@ -360,7 +360,7 @@ reply indicator is also visible.
 
 #### Settings (Admin only)
 
-- **FR-080**: Admin users MUST be able to configure tenant-level settings: API keys for data sources and email-sending platforms, default approval mode, AI spending cap, and alert thresholds.
+- **FR-080**: Admin users MUST be able to configure tenant-level settings: API keys for data sources and email-sending platforms, AI spending cap, and alert thresholds. Tenant Settings MUST NOT include any tenant-wide override for the per-campaign default approval mode — see FR-146.
 - **FR-081**: API keys stored in Settings MUST be encrypted at rest.
 - **FR-082**: API keys MUST never be returned to any client in full once saved; Settings MUST display only a masked form (e.g., last 4 characters).
 
@@ -416,7 +416,7 @@ reply indicator is also visible.
 - **FR-143**: The approval queue MUST support three actions per proposed email: **approve and send** (sends the email — possibly edited — from the owner's connected address), **regenerate** (returns the email to AI for a new draft, discarding the current draft), **reject** (discards the email; no email is sent for that proposal cycle).
 - **FR-144**: All edits to a proposed email — and every approve/regenerate/reject decision — MUST be logged with timestamp and user ID.
 - **FR-145**: The approval queue MUST be per-owner. A user other than the campaign's owner MUST NOT see or act on items in that owner's queue, and probing for them MUST return the same response a missing item would yield (per FR-016).
-- **FR-146**: Every newly-created campaign MUST default to approval-required mode (per constitution Article 6). Switching the campaign to automated mode MUST require an explicit, deliberate action by the campaign owner — never a default value, never a pre-checked checkbox, never inferred from other settings.
+- **FR-146**: Every newly-created campaign MUST default to approval-required mode (per constitution Article 6). Switching the campaign to automated mode MUST require an explicit, deliberate action by the campaign owner — never a default value, never a pre-checked checkbox, never inferred from other settings. There is no tenant-wide override for this default: per Article 6, every new campaign starts in `approval_required` mode without exception, and switching to `automated` is always per-campaign, owner-initiated, and explicitly confirmed (per FR-148).
 - **FR-147**: NO email may be sent by the system without one of the following being true at send time: (a) explicit human approval has been recorded against that specific email (via FR-143's "approve and send" action), or (b) the campaign has been explicitly switched to automated mode by the owner. Any third state — including ambiguity, missing approval state, or unresolved approval mode — MUST result in the email NOT being sent and the situation being logged with action name `send_blocked_invalid_state`.
 - **FR-148**: Every campaign MUST have an `approval_mode` attribute with one of two values: `approval_required` (the default per FR-146) or `automated`. The campaign owner MUST be able to view and toggle this attribute from the campaign detail view in the Campaign Manager. Toggling from `approval_required` to `automated` MUST require an explicit confirmation step (e.g., a confirmation dialog) — never a single-click toggle. Every change to `approval_mode` MUST be logged with timestamp, user ID, tenant ID, campaign ID, previous value, and new value.
 
@@ -463,10 +463,10 @@ reply indicator is also visible.
 - **Engagement Event**: An open, click, or fact-of-reply tied to an Email and a Lead. Carries a timestamp. (Reply content is never stored here.)
 - **Scout Mission**: A lead-discovery run with progress (leads found, budget consumed, time elapsed) and final outcome. Phase 1: mock only. Subject to at-cap enforcement (current batch finishes; new pulls/missions are blocked).
 - **AI Spending Record**: A unit of AI cost tied to a module and a Tenant, contributing to that Tenant's current-period spend. Sourced from AI invocation log entries (FR-092). Drives at-cap enforcement.
-- **Settings (Tenant)**: Tenant-scoped configuration: API keys (encrypted), default approval mode, AI spending cap, warning threshold, default variant counts (proposed, selected), per-feature cache TTLs (per FR-068, bounded between 1 minute and 7 days).
+- **Settings (Tenant)**: Tenant-scoped configuration: API keys (encrypted), AI spending cap, warning threshold, default variant counts (proposed, selected), per-feature cache TTLs (per FR-068, bounded between 1 minute and 7 days). Note: there is no tenant-wide default approval mode — per FR-146 / Article 6, the per-campaign default is fixed at `approval_required` and is not configurable here.
 - **Source Identifier**: A composite reference capturing the network origin of a request — at minimum the IP address and the User-Agent string. Used in login-attempt logs and rate-limiting (FR-002, FR-003). Phase 1 stores both fields in the action log; future phases may extend with additional fingerprint attributes.
 - **System Actor Identifier**: A literal string used in place of a user ID for log entries created by system-initiated events that have no human actor. Format: `system:<subsystem>` — examples include `system:campaign_ownership_timeout`, `system:cap_enforcement`, `system:scheduled_retry`, `system:ai_invocation`. Used by Action Log Entry's actor field when no user is responsible.
-- **Action Log Entry**: A record of any logged action — timestamp, module (per FR-090), action name, tenant ID, **actor** (either a user ID for user-initiated actions or a System Actor Identifier for system-initiated actions), and target resource ID (where applicable). For failed login attempts the actor reference uses the email-hash from FR-002 in lieu of a user ID, since the user is not yet authenticated. For AI-consuming user actions (e.g., `email_regenerate`, `ai_chat_exchange`, `variant_proposal_generated`) the entry MAY carry a `cache_hit` boolean (per FR-068) and, when true, a reference to the AI invocation log entry whose response is being reused. Ownership transfers (manual per FR-134, system-triggered per FR-128) are recorded here with action name `campaign_ownership_transfer` rather than in a separate entity.
+- **Action Log Entry**: A record of any logged action — timestamp, module (per FR-090), action name, tenant ID, **actor** (either a user ID for user-initiated actions or a System Actor Identifier for system-initiated actions), and target resource ID (where applicable). For failed login attempts the actor reference uses the email-hash from FR-002 in lieu of a user ID, since the user is not yet authenticated. AI-consuming user actions (e.g., `email_regenerate`, `ai_chat_exchange`, `variant_proposal_generated`) carry a `cache_hit` boolean per FR-068; when true, the entry also carries a reference ID to the AI invocation log entry whose response is being reused. Ownership transfers (manual per FR-134, system-triggered per FR-128) are recorded here with action name `campaign_ownership_transfer` rather than in a separate entity.
 
 ---
 
@@ -488,7 +488,7 @@ reply indicator is also visible.
 - **SC-012**: 0% of dashboard UI surfaces and 0% of dashboard API responses expose reply content (subject, body, or snippet). The dashboard exposes only the *fact* of reply (lead reference, campaign reference, timestamp).
 - **SC-013**: When a primary email disconnect occurs, an outbound email alert to the user's backup notification address is dispatched within 60 seconds of the disconnect event regardless of the user's online state. The corresponding in-app warning is shown immediately if the user is currently signed in; otherwise it is queued and shown at the start of the user's next session. Owned campaigns continue running during a 24-hour grace period. After 24 hours without reconnection, all campaigns owned by that user transition to paused state and the designated backup owner (or tenant Admins if no backup owner) are notified.
 - **SC-014**: An Admin or Member can navigate from the Campaign Manager to a per-segment Email Performance breakdown for any active campaign in 3 clicks or fewer; the breakdown loads within 3 seconds for a campaign with 10,000 sends.
-- **SC-015**: When variant selection is triggered, the AI proposes the configured number of candidates within 10 seconds; the side-by-side review renders all candidates without horizontal scrolling on a standard laptop screen; the selection-to-test transition completes in under 2 seconds.
+- **SC-015**: When variant selection is triggered, the AI proposes the configured number of candidates within 10 seconds. When N≥2, the side-by-side review renders all candidates without horizontal scrolling on a standard laptop screen. When N=1, the single-candidate confirm-or-regenerate view renders fully on a standard laptop screen without scrolling. The selection-to-test transition completes in under 2 seconds.
 - **SC-016**: A campaign owner can approve, edit, or regenerate any email in their approval queue; each action completes (or fails with a clear reason) within 5 seconds.
 - **SC-017**: The AI Reasoning Panel renders alongside every AI-generated email and shows the hook used, tone choice, recipient assumptions, and lead-profile context referenced — all four fields visible without scrolling on a standard laptop screen.
 - **SC-018**: An Admin can invite a new Member, change a Member's role, or deactivate a Member; the change takes effect within 10 seconds of saving and the action is recorded in the action log per FR-090.

@@ -2,7 +2,7 @@
 
 **Feature Branch**: `001-dashboard-skeleton`
 **Created**: 2026-05-04
-**Status**: Draft (clarifications applied 2026-05-04; post-analysis fix pass applied 2026-05-04)
+**Status**: Draft (clarifications applied 2026-05-04; post-analysis fix pass applied 2026-05-04; follow-up fix pass applied 2026-05-04)
 **Input**: User description: "Build the Dashboard skeleton for Winston Wolf — the foundational web interface that all other modules will plug into. Phase 1 of the platform: a control panel and CRM with login, lead table, lead profile, campaign manager, email performance, scout mission status, AI spending tracker, and Admin-only User Management + Settings. Two roles (Admin, Member). Single tenant in Phase 1 (Richbond) but every entity scoped by tenant_id. Mock data for any module that does not yet exist. Strict tenant isolation, action logging, no plaintext prospect data in logs, encrypted API keys."
 
 ## User Scenarios & Testing *(mandatory)*
@@ -149,10 +149,13 @@ transfers between two connected users are recorded in the action log.
 
 ### User Story 6 - Variant selection at campaign launch (Priority: P2)
 
-When a campaign is being launched, the AI proposes multiple email candidates
-(default 5, configurable per campaign). The campaign owner reviews them
-side-by-side, each with its AI reasoning panel, and selects how many to
-actually test (default 2). Rejected candidates are discarded; selected
+When a campaign is being launched, the AI proposes one or more email
+candidates (default 5, configurable per campaign — minimum 1). When 2 or
+more candidates are proposed, the campaign owner reviews them side-by-side,
+each with its AI reasoning panel, and selects how many to actually test
+(default 2). When exactly 1 candidate is proposed, the owner sees a
+confirm-or-regenerate flow on that single candidate (the reasoning panel is
+still shown). Rejected candidates are discarded; selected (or confirmed)
 variants enter the live test.
 
 **Why this priority**: Variant selection is the gate between AI proposing
@@ -161,14 +164,16 @@ It's where the human owner exercises judgment over what gets sent. Required
 for a credible Outreach demo.
 
 **Independent Test**: A signed-in campaign owner enters the Variant
-Selection view for a launching campaign, sees 5 mock candidate emails
-side-by-side each with its reasoning panel, selects 2, and saves. The 3
-unselected variants are no longer reachable and the 2 selected ones become
-the campaign's live test variants.
+Selection view for a launching campaign. With N=5, they see 5 mock candidate
+emails side-by-side each with its reasoning panel, select 2, and save — the
+3 unselected variants are no longer reachable and the 2 selected ones
+become the campaign's live test variants. With N=1, they see a single mock
+candidate with its reasoning panel and either confirm (the candidate enters
+the live test) or regenerate (a fresh single candidate replaces it).
 
 **Acceptance Scenarios**:
 
-1. **Given** a campaign is being launched, **When** the owner opens Variant Selection, **Then** N mock candidate emails are shown side-by-side (N defaults to 5, configurable per campaign), each with subject, body, and a read-only AI reasoning panel.
+1. **Given** a campaign is being launched, **When** the owner opens Variant Selection, **Then** the configured number of mock candidate emails is shown — side-by-side when N≥2 (N defaults to 5, configurable per campaign), or as a single-candidate confirm-or-regenerate flow when N=1 — each candidate showing subject, body, and a read-only AI reasoning panel.
 2. **Given** the owner is in Variant Selection, **When** they select 2 of the candidates and save, **Then** those 2 enter the live test and the others are discarded — discarded candidates are not stored for future reuse.
 3. **Given** the owner has selected variants, **When** they revisit the campaign detail view, **Then** the selected variants are visible as the campaign's live variants.
 4. **Given** the system is at the AI spending cap, **When** the owner opens Variant Selection for a campaign that has not yet been launched, **Then** the variant proposal action is visibly blocked with the at-cap reason.
@@ -346,7 +351,7 @@ reply indicator is also visible.
 - **FR-065**: At-cap enforcement MUST NOT abort a running scout mission. A running mission MUST complete its current batch but MUST NOT pull additional leads. New scout missions MUST NOT start until the cap is raised or the period resets.
 - **FR-066**: The dashboard MUST surface the at-cap state in: the persistent stats bar, the AI Spending tracker, the Approval Queue (Regenerate and Chat input disabled), Variant Selection (new proposals disabled), AI Chat (input disabled), Scout Mission Status (new-mission action disabled), and the Mission Launcher entry point. Each disabled control MUST display the at-cap reason in plain language.
 - **FR-067**: When the configured cap is raised by an Admin or the cap period resets, previously-blocked controls MUST become available again automatically without further configuration.
-- **FR-068**: AI responses that can be deterministically reused MUST be cached. Every AI-generating feature MUST define a cache key strategy and a time-to-live (TTL). At minimum this applies to: regenerated email drafts (FR-143), AI Chat exchanges where an identical question targets the same draft (FR-170), and AI Reasoning regeneration on identical inputs (FR-160). Cache hits MUST NOT count against the AI spending cap; cache misses (which trigger an actual model call) MUST count.
+- **FR-068**: AI responses that can be deterministically reused MUST be cached. Every AI-generating feature MUST define a cache key strategy and a time-to-live (TTL). At minimum this applies to: regenerated email drafts (FR-143), AI Chat exchanges where an identical question targets the same draft (FR-170), and AI Reasoning regeneration on identical inputs (FR-160). Cache hits MUST NOT count against the AI spending cap; cache misses (which trigger an actual model call) MUST count. Every cache hit MUST be marked with a `cache_hit: true` boolean on the user-action log entry that triggered it (e.g., `email_regenerate`, `ai_chat_exchange`, `variant_proposal_generated`); when `cache_hit` is true, the entry MUST also include a reference ID pointing to the original AI invocation log entry (FR-092) whose response is being reused. The `cache_hit` flag is for forensic and analytics purposes only — it does NOT affect cap accounting. Cache TTL MUST be specified per feature in Settings (Tenant); default values are: AI Chat exchanges 1 hour, Email Drafts 24 hours, Email Variants 24 hours, AI Reasoning panels 24 hours. Per-feature overrides via Settings are allowed but MUST be bounded between 1 minute and 7 days.
 
 #### User Management (Admin only)
 
@@ -413,11 +418,12 @@ reply indicator is also visible.
 - **FR-145**: The approval queue MUST be per-owner. A user other than the campaign's owner MUST NOT see or act on items in that owner's queue, and probing for them MUST return the same response a missing item would yield (per FR-016).
 - **FR-146**: Every newly-created campaign MUST default to approval-required mode (per constitution Article 6). Switching the campaign to automated mode MUST require an explicit, deliberate action by the campaign owner — never a default value, never a pre-checked checkbox, never inferred from other settings.
 - **FR-147**: NO email may be sent by the system without one of the following being true at send time: (a) explicit human approval has been recorded against that specific email (via FR-143's "approve and send" action), or (b) the campaign has been explicitly switched to automated mode by the owner. Any third state — including ambiguity, missing approval state, or unresolved approval mode — MUST result in the email NOT being sent and the situation being logged with action name `send_blocked_invalid_state`.
+- **FR-148**: Every campaign MUST have an `approval_mode` attribute with one of two values: `approval_required` (the default per FR-146) or `automated`. The campaign owner MUST be able to view and toggle this attribute from the campaign detail view in the Campaign Manager. Toggling from `approval_required` to `automated` MUST require an explicit confirmation step (e.g., a confirmation dialog) — never a single-click toggle. Every change to `approval_mode` MUST be logged with timestamp, user ID, tenant ID, campaign ID, previous value, and new value.
 
 #### Variant Selection
 
 - **FR-150**: For each campaign launch, the AI MUST propose at least 1 email candidate (configurable per campaign, default 5). When 2 or more candidates are configured, the Variant Selection view MUST display them side-by-side. When exactly 1 candidate is configured, the Variant Selection view MUST show that candidate as a confirm-or-regenerate flow rather than a side-by-side comparison.
-- **FR-151**: The campaign owner MUST review all proposed candidates side-by-side, each accompanied by its AI reasoning panel.
+- **FR-151**: The campaign owner MUST review every proposed candidate, each accompanied by its AI reasoning panel. When 2 or more candidates are configured, the review MUST present them side-by-side. When exactly 1 candidate is configured, the review MUST present that single candidate as a confirm-or-regenerate flow (per FR-150), with the reasoning panel still displayed.
 - **FR-152**: The campaign owner MUST select how many candidates to actually test, with a default of 2. Selected variants MUST enter the live test.
 - **FR-153**: Rejected (unselected) candidates MUST be discarded. They MUST NOT be retained for future reuse, recommendations, or model training.
 
@@ -448,7 +454,7 @@ reply indicator is also visible.
 - **Connected Email**: A per-User record holding the user's email-sending identity. Carries the email address (visible) and encrypted credentials/tokens (never visible). Has a connection status (connected, disconnected). Required for campaign ownership.
 - **Backup Notification Email**: A per-User record holding a personal email address used solely for system notifications (disconnect alerts, takeover prompts, admin fallback alerts). The address itself is encrypted at rest and is never returned to any client in full once saved. Never used to send cold opens. Mandatory before a Connected Email may be set.
 - **Lead (Prospect)**: An individual prospect within a Tenant. Attributes: name, email, title, seniority, company, company size, industry, location, current status (which can include "replied"), lead score, sequence stage, last touchpoint. Holds the *fact* of any reply (timestamp, campaign reference) but never reply content.
-- **Campaign**: A grouping of outreach activity within a Tenant. Has status (active, paused, past), aggregate metrics (leads count, sends, replies, click rate), exactly one primary owner (a User), an optional `backup_owner_user_id` reference to another User with a connected email (nullable when fewer than two users in the tenant have connected emails; required once at least two do; per FR-136 must differ from the primary owner), and a per-campaign variant-count configuration.
+- **Campaign**: A grouping of outreach activity within a Tenant. Has status (active, paused, past), aggregate metrics (leads count, sends, replies, click rate), exactly one primary owner (a User), an optional `backup_owner_user_id` reference to another User with a connected email (nullable when fewer than two users in the tenant have connected emails; required once at least two do; per FR-136 must differ from the primary owner), an `approval_mode` attribute (per FR-148, default `approval_required`, alternative `automated`, owner-toggleable from the campaign detail view with explicit confirmation), and a per-campaign variant-count configuration.
 - **Email**: A sent message tied to a Lead in the context of a Campaign. Has content, send timestamp, sender (the owner's connected email address at send time), and downstream events (opens, clicks, replies — replies stored as fact-of-reply only).
 - **Email Draft**: A proposed, AI-generated email awaiting owner action in the approval queue. Carries recipient (lead reference), subject, body, edit history, decision (pending, approved-and-sent, regenerated, rejected), an associated AI Reasoning record, and an associated AI Chat thread. Tied to a Campaign.
 - **Email Variant**: A candidate email proposed during variant selection. Carries subject, body, an associated AI Reasoning record, and a status (proposed, selected-for-test, rejected). Rejected variants are discarded, not retained.
@@ -457,10 +463,10 @@ reply indicator is also visible.
 - **Engagement Event**: An open, click, or fact-of-reply tied to an Email and a Lead. Carries a timestamp. (Reply content is never stored here.)
 - **Scout Mission**: A lead-discovery run with progress (leads found, budget consumed, time elapsed) and final outcome. Phase 1: mock only. Subject to at-cap enforcement (current batch finishes; new pulls/missions are blocked).
 - **AI Spending Record**: A unit of AI cost tied to a module and a Tenant, contributing to that Tenant's current-period spend. Sourced from AI invocation log entries (FR-092). Drives at-cap enforcement.
-- **Settings (Tenant)**: Tenant-scoped configuration: API keys (encrypted), default approval mode, AI spending cap, warning threshold, default variant counts (proposed, selected).
+- **Settings (Tenant)**: Tenant-scoped configuration: API keys (encrypted), default approval mode, AI spending cap, warning threshold, default variant counts (proposed, selected), per-feature cache TTLs (per FR-068, bounded between 1 minute and 7 days).
 - **Source Identifier**: A composite reference capturing the network origin of a request — at minimum the IP address and the User-Agent string. Used in login-attempt logs and rate-limiting (FR-002, FR-003). Phase 1 stores both fields in the action log; future phases may extend with additional fingerprint attributes.
 - **System Actor Identifier**: A literal string used in place of a user ID for log entries created by system-initiated events that have no human actor. Format: `system:<subsystem>` — examples include `system:campaign_ownership_timeout`, `system:cap_enforcement`, `system:scheduled_retry`, `system:ai_invocation`. Used by Action Log Entry's actor field when no user is responsible.
-- **Action Log Entry**: A record of any logged action — timestamp, module (per FR-090), action name, tenant ID, **actor** (either a user ID for user-initiated actions or a System Actor Identifier for system-initiated actions), and target resource ID (where applicable). For failed login attempts the actor reference uses the email-hash from FR-002 in lieu of a user ID, since the user is not yet authenticated. Ownership transfers (manual per FR-134, system-triggered per FR-128) are recorded here with action name `campaign_ownership_transfer` rather than in a separate entity.
+- **Action Log Entry**: A record of any logged action — timestamp, module (per FR-090), action name, tenant ID, **actor** (either a user ID for user-initiated actions or a System Actor Identifier for system-initiated actions), and target resource ID (where applicable). For failed login attempts the actor reference uses the email-hash from FR-002 in lieu of a user ID, since the user is not yet authenticated. For AI-consuming user actions (e.g., `email_regenerate`, `ai_chat_exchange`, `variant_proposal_generated`) the entry MAY carry a `cache_hit` boolean (per FR-068) and, when true, a reference to the AI invocation log entry whose response is being reused. Ownership transfers (manual per FR-134, system-triggered per FR-128) are recorded here with action name `campaign_ownership_transfer` rather than in a separate entity.
 
 ---
 
@@ -471,7 +477,7 @@ reply indicator is also visible.
 - **SC-001**: An Admin user can complete the path Login → Lead Table → Lead Profile and view mock email history and AI spending data in a single session, without written instructions.
 - **SC-002**: A Member user can complete the same lead-viewing path, cannot reach User Management or Settings via navigation or direct URL, and cannot change the AI spending cap.
 - **SC-003**: 100% of cross-tenant data-access attempts (whether by URL probing or by API call) return the same response shape as a non-existent resource — no information leaks about other tenants.
-- **SC-004**: 100% of significant user actions appear in the action log with tenant ID, user ID, and timestamp, and 0% contain prospect personal data in plain text.
+- **SC-004**: 100% of logged actions appear with tenant ID, module, actor (user ID for user-initiated events, System Actor Identifier for system-initiated events, email-hash for failed-login attempts), and timestamp; 0% contain prospect personal data in plain text.
 - **SC-005**: The Lead Table renders 1,000 leads within 2 seconds (initial paint to interactive) on a standard laptop.
 - **SC-006**: A non-technical user given valid credentials can complete the Login → Lead Profile path on first attempt without external guidance, in under 90 seconds.
 - **SC-007**: All stored API keys and connected-email credentials remain unrecoverable from any UI surface or API response after they have been saved (only the masked form / status is retrievable).
@@ -480,7 +486,7 @@ reply indicator is also visible.
 - **SC-010**: A campaign cannot be launched or transferred to a user who does not have a connected email; the system blocks the assignment and surfaces the reason.
 - **SC-011**: 100% of cold-open emails sent by a campaign are sent from the connected email address of that campaign's owner — not from a system or shared address.
 - **SC-012**: 0% of dashboard UI surfaces and 0% of dashboard API responses expose reply content (subject, body, or snippet). The dashboard exposes only the *fact* of reply (lead reference, campaign reference, timestamp).
-- **SC-013**: When a primary email disconnect occurs, the user receives an in-app warning AND a backup-notification-email alert within 60 seconds. Owned campaigns continue running during a 24-hour grace period. After 24 hours without reconnection, all campaigns owned by that user transition to paused state and the designated backup owner (or tenant Admins if no backup owner) are notified.
+- **SC-013**: When a primary email disconnect occurs, an outbound email alert to the user's backup notification address is dispatched within 60 seconds of the disconnect event regardless of the user's online state. The corresponding in-app warning is shown immediately if the user is currently signed in; otherwise it is queued and shown at the start of the user's next session. Owned campaigns continue running during a 24-hour grace period. After 24 hours without reconnection, all campaigns owned by that user transition to paused state and the designated backup owner (or tenant Admins if no backup owner) are notified.
 - **SC-014**: An Admin or Member can navigate from the Campaign Manager to a per-segment Email Performance breakdown for any active campaign in 3 clicks or fewer; the breakdown loads within 3 seconds for a campaign with 10,000 sends.
 - **SC-015**: When variant selection is triggered, the AI proposes the configured number of candidates within 10 seconds; the side-by-side review renders all candidates without horizontal scrolling on a standard laptop screen; the selection-to-test transition completes in under 2 seconds.
 - **SC-016**: A campaign owner can approve, edit, or regenerate any email in their approval queue; each action completes (or fails with a clear reason) within 5 seconds.
@@ -513,4 +519,5 @@ reply indicator is also visible.
 - Action logs are retained for at least 90 days.
 - Sessions expire after 8 hours of inactivity; the user is redirected to login on the next protected request.
 - Phase 1 has no in-dashboard data export UI per FR-095; client-data export is performed via direct query against the data layer when needed. The data structure is designed to be exportable in CSV and JSON without any restructuring effort.
+- Default cache TTLs (per FR-068): AI Chat exchanges 1 hour; Email Drafts 24 hours; Email Variants 24 hours; AI Reasoning panels 24 hours. Per-feature overrides allowed in Settings (Tenant), bounded to [1 minute, 7 days].
 - Mobile layouts, multi-language UI, single sign-on / social login, the Mission Launcher form (page exists; form is out of scope), the Email Sequence Editor, the manual "take over" / handoff control (which has been removed from product scope), capturing or displaying reply content in the dashboard, and an in-dashboard data-export UI are all explicitly out of scope for Phase 1.

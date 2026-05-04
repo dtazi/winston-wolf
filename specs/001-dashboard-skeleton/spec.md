@@ -360,7 +360,7 @@ reply indicator is also visible.
 
 #### Settings (Admin only)
 
-- **FR-080**: Admin users MUST be able to configure tenant-level settings: API keys for data sources and email-sending platforms, AI spending cap, and alert thresholds. Tenant Settings MUST NOT include any tenant-wide override for the per-campaign default approval mode — see FR-146.
+- **FR-080**: Admin users MUST be able to configure tenant-level settings: API keys for data sources and email-sending platforms (encrypted), AI spending cap, AI spending warning threshold, default variant counts (proposed and selected), and per-feature cache TTLs (subject to FR-068 bounds). Tenant Settings MUST NOT include any tenant-wide override for the per-campaign default approval mode — see FR-146.
 - **FR-081**: API keys stored in Settings MUST be encrypted at rest.
 - **FR-082**: API keys MUST never be returned to any client in full once saved; Settings MUST display only a masked form (e.g., last 4 characters).
 

@@ -2,14 +2,14 @@
   "version": "0.8.5.dev0",
   "integration_state_schema": 1,
   "installed_integrations": [
-    "windsurf"
+    "claude"
   ],
   "integration_settings": {
-    "windsurf": {
+    "claude": {
       "script": "sh",
-      "invoke_separator": "."
+      "invoke_separator": "-"
     }
   },
-  "integration": "windsurf",
-  "default_integration": "windsurf"
+  "integration": "claude",
+  "default_integration": "claude"
 }

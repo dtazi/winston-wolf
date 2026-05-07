@@ -370,11 +370,6 @@ reply indicator is also visible.
 - **FR-091**: Prospect personal data (name, email, title, company name) MUST NOT appear in plain text in any log entry; logs MUST reference lead IDs only. The same rule applies to reply content — which the dashboard does not capture in the first place. The same rule applies to the email submitted in failed login attempts (per FR-002).
 - **FR-092**: Every AI model invocation MUST be logged with: timestamp, module emitting the call, action name, tenant ID, actor (user ID or System Actor Identifier), model name, estimated input tokens, estimated output tokens, and a reference ID linking the call to the user-facing action that triggered it. AI invocation log entries are the source of truth for AI Spending Records (FR-060) and at-cap accounting (FR-063, FR-068).
 
-#### Data Ownership & Export
-
-- **FR-095**: All client data — leads, campaigns, sent emails, engagement events, action logs, settings, AI drafts, AI variants, AI reasoning records, AI chat exchanges — MUST be designed in a structure that supports full export in standard formats (at minimum CSV and JSON). Phase 1 does NOT require an in-dashboard export UI; the data layer MUST be exportable via direct query when needed. Future phases will add a self-serve export UI.
-- **FR-096**: NO client data may be used to train shared models, fine-tune cross-tenant prompts, or inform another tenant's campaigns in any way. Within a single tenant, *intra-tenant* learning IS permitted and intentional — the Learning Engine improves a client's future campaigns from that same client's past results. The prohibition applies strictly across tenant boundaries.
-
 #### Mock Data
 
 - **FR-100**: System MUST operate end-to-end against mock data for any field sourced from modules that do not yet exist (Scout, Outreach including email drafts and variants, Learning Engine, AI Chat, AI Reasoning) during Phase 1. The Dashboard skeleton in Phase 1 does NOT surface any Knowledge Base data directly — Knowledge Base is consumed by the future Outreach module, not by the Dashboard — so no Knowledge Base mock data is required in this feature.

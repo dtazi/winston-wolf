@@ -64,6 +64,11 @@ be used wherever AI responses can be reused.
 
 ## Article 5 — Modular Architecture
 
+The platform's modular boundaries exist to enable disciplined 
+extension across industries. Industry knowledge lives in 
+configuration, prompts, data sources, and tenant settings, 
+never in module internals.
+
 The platform has six distinct modules: Configuration, Scout, 
 Outreach, Engagement Tracker, Knowledge Base, Learning Engine. 
 Each module MUST be independently deployable and testable. 
@@ -80,15 +85,6 @@ is optional and must be explicitly enabled per campaign. The
 default for any new campaign is approval-required. The system 
 MUST never send emails without either explicit human approval 
 or explicit automation mode being turned on.
-
----
-
-## Article 7 — Data Ownership
-
-All lead and engagement data belongs to the client, not the 
-platform. The platform MUST make it possible to export all 
-client data in a standard format. No client data may be used 
-to train shared models or inform other clients' campaigns.
 
 ---
 

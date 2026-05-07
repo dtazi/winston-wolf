@@ -81,13 +81,6 @@ justification, or the plan does not proceed.
       per-campaign opt-in. The system cannot send email without one of
       those modes being set.
 
-### Article 7 — Data Ownership
-
-- [ ] All client data added by this feature is exportable in a standard
-      format.
-- [ ] No client data is pooled into shared models or used to inform
-      another client's campaigns.
-
 ### Article 8 — Testing Standards
 
 - [ ] Plan includes at least one happy-path test and one error-path test

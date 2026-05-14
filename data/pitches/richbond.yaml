@@ -1,0 +1,108 @@
+customer: richbond
+created: 2026-05-14
+updated: 2026-05-14
+version: 1
+
+one_liner: |
+  Industrial-scale mattress manufacturer based in Morocco, serving institutional
+  bulk buyers in hospitality, healthcare, education, and government.
+
+pains_solved:
+  - id: bulk_durability
+    label: Bedding durability under high-turnover use
+    description: |
+      Institutions cycle bedding 3-5x faster than residential. Standard mattresses
+      fail under that load. Richbond builds for it.
+
+  - id: tco_framing
+    label: Total cost of ownership / cost-per-bed-night
+    description: |
+      Procurement teams care about lifetime cost, not unit price. Richbond mattresses
+      last longer per dirham than commodity imports.
+
+  - id: regulatory_compliance
+    label: Fire-safety and regulatory compliance
+    description: |
+      Healthcare and dorm bedding has strict flammability and material requirements.
+      Richbond's bedding passes them.
+
+  - id: supply_diversification
+    label: Supply-chain risk reduction (China +1)
+    description: |
+      Buyers exposed to China tariffs, lead-time variance, and political risk are
+      actively seeking alternative manufacturing geographies. Richbond is the
+      Morocco answer to that.
+
+differentiation:
+  - id: china_plus_one
+    label: Morocco manufacturing — direct China alternative
+    proof: |
+      EU FTA in place; geographic proximity to EU and US East Coast ports; no
+      Section 301 tariff exposure; French / English / Arabic-speaking sales team.
+
+  - id: vertical_integration
+    label: In-house foam, fabric, and finishing
+    proof: |
+      Single-source accountability across the bill of materials; faster customization
+      cycles than buyers used to from Asian factories.
+
+  - id: institutional_track_record
+    label: Long history with institutional buyers in MENA
+    proof: |
+      [TO FILL: specific reference accounts in hospitality, healthcare, military]
+
+proof_points:
+  - type: certification
+    label: "[TO CONFIRM with Richbond] Fire-safety: UL, CertiPUR-US, BS 7177"
+  - type: customer_reference
+    label: "[TO FILL] Major MENA hospitality group reference"
+  - type: factory_capacity
+    label: "[TO FILL] Production capacity in unit-equivalents per month"
+  - type: certification
+    label: "[TO CONFIRM] ISO 9001 / ISO 14001"
+
+cta:
+  primary:
+    label: Sample request + 20-minute discovery call
+    rationale: Lowest-friction first step; gives Richbond presence in their RFQ shortlist next time
+  secondary:
+    label: Spec sheet PDF download
+    rationale: For lurkers not yet ready to talk
+
+price_framing: value
+# value   = quality-and-durability-justified, mid-to-premium pricing
+# premium = top-tier-only positioning
+# parity  = compete on price with commodity
+
+tone: |
+  Professional, direct, industrialist-to-industrialist. Not salesy or aspirational.
+  Concrete numbers preferred over adjectives. French/English bilingual register fine.
+
+common_objections:
+  - objection: "We don't know Moroccan manufacturers"
+    handling: |
+      Offer factory visit (Richbond covers travel for serious prospects), share
+      institutional references, link to certifications.
+
+  - objection: "We have existing supplier relationships"
+    handling: |
+      Position as supply diversification (China +1), not replacement. Add us as
+      a second source — see if we earn the volume over time.
+
+  - objection: "We're too small for international supply"
+    handling: |
+      Containerized orders with MOQ flexibility; consolidate with other regional
+      institutions; spec sheets allow direct comparison without commitment.
+
+  - objection: "Shipping cost makes Morocco non-viable"
+    handling: |
+      Compare landed cost, not FOB. Tariff exposure on Chinese imports often eats
+      the shipping advantage. Casablanca → US East Coast: ~2 weeks.
+
+# Placeholders Richbond should fill in before going live:
+to_confirm_with_client:
+  - Specific certifications held (current/expired)
+  - 2-3 reference accounts permitted for cold-email mention
+  - Production capacity (units/month) for honesty in sales conversations
+  - Lead times by container size
+  - Sample policy (free / cost / who pays shipping)

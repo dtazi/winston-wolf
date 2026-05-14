@@ -1,0 +1,246 @@
+id: richbond-us-institutional-pilot-2026q2
+customer: richbond
+name: Richbond US Institutional Pilot
+created: 2026-05-14
+updated: 2026-05-14
+status: draft
+
+spine_pitch: |
+  Bulk durability + Morocco-made supply diversification, for institutional
+  high-turnover bedding buyers.
+
+geography:
+  calibration_tier:
+    description: Lower-stakes states where we test the message
+    regions:
+      - { country: US, state: MT }
+      - { country: US, state: WY }
+      - { country: US, state: SD }
+      - { country: US, state: ND }
+      - { country: US, state: NE }
+      - { country: US, state: IA }
+      - { country: US, state: KS }
+
+  scaling_tier:
+    description: High-value markets, only after calibration validates the message
+    regions:
+      - { country: US, state: NY }
+      - { country: US, state: FL }
+      - { country: US, state: MA }
+      - { country: US, state: IL }
+      - { country: US, state: TX }
+      - { country: US, state: CA }
+
+sub_niches:
+  - id: edu_university_dorms
+    label: University dormitories
+    industry: Education
+    included: true
+    rationale: Direct decision-makers reachable; large universe via IPEDS + ACUHO-I
+
+  - id: edu_boarding_schools
+    label: Boarding schools (K-12)
+    industry: Education
+    included: true
+    rationale: ~300 schools globally via TABS, end-to-end manageable
+
+  - id: edu_summer_camps
+    label: Summer camps
+    industry: Education
+    included: false
+    rationale: Seasonal/light buyers; defer
+
+  - id: mf_student_housing_operators
+    label: Student housing operators
+    industry: Multi-family
+    included: true
+    rationale: ~25 operators control most beds (SHB Top 25)
+
+  - id: mf_coliving_operators
+    label: Co-living operators
+    industry: Multi-family
+    included: true
+    rationale: Co-Liv directory covers the small universe
+
+  - id: mf_corporate_housing
+    label: Corporate housing
+    industry: Multi-family
+    included: false
+    rationale: Different pain profile (executives, brand-driven); would dilute pitch
+
+  - id: mf_senior_independent_living
+    label: Senior independent living
+    industry: Multi-family
+    included: true
+    rationale: Same archetype as AL; included per user decision
+
+  - id: hc_assisted_living
+    label: Assisted living
+    industry: Healthcare
+    included: true
+    rationale: Full state licensure data is free and rich
+
+  - id: hc_memory_care
+    label: Memory care
+    industry: Healthcare
+    included: true
+    rationale: Mostly operated by AL chains; overlap with Argentum
+
+  - id: hc_skilled_nursing
+    label: Skilled nursing facilities
+    industry: Healthcare
+    included: true
+    rationale: CMS Nursing Home Compare = highest-leverage public source on the entire map
+
+  - id: hc_hospitals
+    label: Hospitals
+    industry: Healthcare
+    included: false
+    rationale: GPO-bound, cold email is the wrong tool
+
+  - id: hc_hospice
+    label: Hospice
+    industry: Healthcare
+    included: false
+    rationale: Low volume per facility; defer
+
+niche_details:
+  edu_university_dorms:
+    size_estimate: "~900 institutions (IPEDS)"
+    procurement_model: internal
+    target_titles:
+      - Housing Director
+      - Director of Residence Life
+      - Assistant Director of Housing
+      - Facilities Director
+    company_size: any
+    buying_trigger: Academic calendar (summer turnover); replacement cycle ~7-10 yrs
+    value_angle: Durability + cost-per-bed-night + ADA / fire code compliance
+    findability: high
+
+  edu_boarding_schools:
+    size_estimate: "~300 globally (TABS)"
+    procurement_model: internal
+    target_titles:
+      - Head of School
+      - Director of Boarding
+      - Director of Facilities
+    company_size: small-to-mid
+    buying_trigger: Multi-year refresh; new dorm construction
+    value_angle: Durability + safety codes + long-life cost framing
+    findability: high
+
+  mf_student_housing_operators:
+    size_estimate: "~25 operators control most professionally-managed beds"
+    procurement_model: internal
+    target_titles:
+      - VP of Operations
+      - Director of Procurement
+      - Asset Manager
+    company_size: large
+    buying_trigger: Academic year refresh; new property openings
+    value_angle: Bulk pricing + replacement cycle alignment with academic calendar
+    findability: high
+
+  mf_coliving_operators:
+    size_estimate: "~30-50 operators globally (small universe)"
+    procurement_model: internal
+    target_titles:
+      - Founder / CEO
+      - COO
+      - Head of Operations
+    company_size: small-to-mid
+    buying_trigger: New property launches
+    value_angle: Bulk pricing + fast lead times + design flexibility
+    findability: medium
+
+  mf_senior_independent_living:
+    size_estimate: "~100 large operators (ASHA-tracked)"
+    procurement_model: internal
+    target_titles:
+      - VP of Operations
+      - VP of Procurement
+      - Director of Capital Expenditure
+    company_size: large
+    buying_trigger: Property refresh cycles; new community openings
+    value_angle: Durability + comfort + fire safety
+    findability: high
+
+  hc_assisted_living:
+    size_estimate: "~30,000 facilities in US (state licensure)"
+    procurement_model: mixed (chain HQ + facility-level)
+    target_titles:
+      - Executive Director
+      - VP of Operations
+      - Director of Procurement
+    company_size: small-to-large
+    buying_trigger: Property refresh; capital expenditure cycle
+    value_angle: Durability + cleanability + fire safety + cost-per-bed-night
+    findability: medium
+
+  hc_memory_care:
+    size_estimate: "~5,000-7,000 dedicated facilities; most operated by AL chains"
+    procurement_model: mixed
+    target_titles:
+      - Executive Director
+      - VP of Operations
+      - Director of Procurement
+    company_size: small-to-large
+    buying_trigger: Property refresh; capital expenditure cycle
+    value_angle: Cleanability (incontinence-resistant) + durability + safety
+    findability: medium
+
+  hc_skilled_nursing:
+    size_estimate: "~15,000 SNFs in US (CMS data)"
+    procurement_model: operator HQ; GPO involvement common
+    target_titles:
+      - VP of Operations
+      - Director of Procurement
+      - Director of Operations
+    company_size: small-to-large
+    buying_trigger: Capital expenditure cycle; regulatory refresh
+    value_angle: Cleanability + durability + pressure-relief spec + cost
+    findability: very high
+
+source_channels:
+  edu_university_dorms:
+    - { id: ipeds,                 type: public_record, access: free,        priority: 1 }
+    - { id: acuhoi_directory,      type: directory,     access: paid_approx, priority: 2 }
+    - { id: linkedin_job_postings, type: signal,        access: free,        priority: 3 }
+
+  edu_boarding_schools:
+    - { id: tabs_directory,        type: directory,     access: free,        priority: 1 }
+    - { id: nais_directory,        type: directory,     access: paid_approx, priority: 2 }
+
+  mf_student_housing_operators:
+    - { id: shb_top25,             type: publication,   access: free,        priority: 1 }
+    - { id: nmhc_directory,        type: directory,     access: paid_approx, priority: 2 }
+    - { id: linkedin_job_postings, type: signal,        access: free,        priority: 3 }
+
+  mf_coliving_operators:
+    - { id: coliv_directory,       type: directory,     access: paid_approx, priority: 1 }
+
+  mf_senior_independent_living:
+    - { id: asha_directory,        type: directory,     access: paid,        priority: 1 }
+    - { id: senior_housing_news_rankings, type: publication, access: free,   priority: 2 }
+    - { id: leadingage_directory,  type: directory,     access: paid_approx, priority: 3 }
+
+  hc_assisted_living:
+    - { id: state_al_licensure,    type: public_record, access: free,        priority: 1 }
+    - { id: argentum_directory,    type: directory,     access: paid_approx, priority: 2 }
+
+  hc_memory_care:
+    - { id: argentum_directory,    type: directory,     access: paid_approx, priority: 1 }
+    - { id: state_al_licensure,    type: public_record, access: free,        priority: 2 }
+
+  hc_skilled_nursing:
+    - { id: cms_nursing_home_compare, type: public_record, access: free,     priority: 1 }
+    - { id: ahca_directory,        type: directory,     access: paid_approx, priority: 2 }
+
+retrospective:
+  filled: false
+  missed_niches: []
+  best_source_channels: []
+  best_titles: []
+  best_pitch_angles: []
+  lessons: ""

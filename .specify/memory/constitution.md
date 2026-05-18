@@ -1,7 +1,7 @@
 # Winston Wolf — Project Constitution
 **Project:** winston-wolf  
 **Ratification Date:** 2026-05-04  
-**Last Amended:** 2026-05-04
+**Last Amended:** 2026-05-14
 
 ---
 
@@ -54,11 +54,20 @@ titles, company data). The following rules are absolute:
 
 ## Article 4 — AI Cost Awareness
 
-Every feature that uses an AI model MUST be designed with token 
-cost in mind. Prompts MUST be concise. Context passed to models 
-MUST be trimmed to only what is necessary. No feature may send 
-the full database to a model when a summary will do. Caching MUST 
-be used wherever AI responses can be reused.
+**Code-first principle.** If a task can be accomplished with 
+deterministic code, it MUST be done with code, not with an LLM. 
+LLMs are reserved for natural-language generation (composing 
+copy), judgment over ambiguous input (classifying sentiment, 
+ranking subjective relevance), and conversational synthesis 
+where the rules cannot be specified up front. Parsing structured 
+data, applying well-defined classifications, computing 
+aggregates, and pattern matching MUST be done in code.
+
+**Cost is a second-order concern during the build phase.** Be 
+mindful of token cost, but do not let it block progress. 
+Prompt/context trimming, caching, and similar optimizations are 
+deferred until a feature works correctly. Correctness first, 
+efficiency second.
 
 ---
 

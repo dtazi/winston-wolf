@@ -136,6 +136,23 @@ One row per individual email send. A lead can have multiple sends over time (ini
 
 Indexes: `(lead_id, sent_at)`, `(pixel_token)`, `(microsoft_message_id)`.
 
+### Table: `tracked_links`
+
+One row per trackable link placed in an outgoing email. The click redirector
+looks up the token, logs the click, and forwards to `original_url`. (Added
+2026-05-14 when the tracking server was built — the click redirector needs a
+token→URL map the original foundation draft lacked.)
+
+| column | type | notes |
+|---|---|---|
+| id | TEXT PRIMARY KEY | the click token, embedded in the email link |
+| send_id | TEXT FK → sends.id | which send this link belongs to |
+| lead_id | TEXT FK → leads.id | denormalized for fast event writes |
+| original_url | TEXT | the real destination to 302-redirect to |
+| created_at | TIMESTAMP | |
+
+Index: `(send_id)`.
+
 ### Table: `events`
 
 Append-only log of everything that happens to a lead. This is where the compounding-intelligence layer reads from.

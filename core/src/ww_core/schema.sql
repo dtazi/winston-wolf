@@ -84,6 +84,18 @@ CREATE INDEX IF NOT EXISTS idx_sends_lead ON sends(lead_id, sent_at);
 CREATE INDEX IF NOT EXISTS idx_sends_pixel ON sends(pixel_token);
 CREATE INDEX IF NOT EXISTS idx_sends_msft_id ON sends(microsoft_message_id);
 
+-- Tracked links: maps a click token (embedded in an email link) back to its
+-- original destination URL, so the redirector can log the click and forward.
+CREATE TABLE IF NOT EXISTS tracked_links (
+    id TEXT PRIMARY KEY,
+    send_id TEXT NOT NULL REFERENCES sends(id),
+    lead_id TEXT NOT NULL REFERENCES leads(id),
+    original_url TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_tracked_links_send ON tracked_links(send_id);
+
 CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     lead_id TEXT NOT NULL REFERENCES leads(id),

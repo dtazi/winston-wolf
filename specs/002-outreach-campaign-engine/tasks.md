@@ -15,9 +15,9 @@ User stories (from spec.md): **US1** validate first batch in review mode (P1, MV
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Create `engine/` module structure (`src/ww_engine/`, `src/ww_engine/drafting/`, `tests/unit/`, `tests/integration/`, `tests/contract/`) per plan.md
-- [ ] T002 Create `engine/pyproject.toml` (`ww-engine`, `requires-python>=3.11`, deps: `typer>=0.12`, `rich>=13.0`, `requests`, path deps `ww-core` and `ww-outreach`; `[project.scripts] ww-engine=ww_engine.cli:app`; hatchling), then `uv sync` in `engine/`
-- [ ] T003 [P] Add `engine/tests/` pytest config (pytest in dev deps, `tests/__init__.py`, conftest with a tmp `leads.db` fixture seeded via `ww-core`)
+- [X] T001 Create `engine/` module structure (`src/ww_engine/`, `src/ww_engine/drafting/`, `tests/unit/`, `tests/integration/`, `tests/contract/`) per plan.md
+- [X] T002 Create `engine/pyproject.toml` (`ww-engine`, `requires-python>=3.11`, deps: `typer>=0.12`, `rich>=13.0`, `requests`, path deps `ww-core` and `ww-outreach`; `[project.scripts] ww-engine=ww_engine.cli:app`; hatchling), then `uv sync` in `engine/`
+- [X] T003 [P] Add `engine/tests/` pytest config (pytest in dev deps, `tests/__init__.py`, conftest with a tmp `leads.db` fixture seeded via `ww-core`)
 
 ---
 
@@ -25,17 +25,17 @@ User stories (from spec.md): **US1** validate first batch in review mode (P1, MV
 
 **⚠️ No user story work begins until this phase is complete.**
 
-- [ ] T004 Implement structured logger in `engine/src/ww_engine/logging.py` — emits `{action, module:"engine", customer_id, campaign_id, lead_id?, ts}`; helper asserts no email/name/body is ever passed (Article 3 & 10). Built first; every later task uses it.
-- [ ] T005 Write `engine/schema_engine.sql` and the idempotent applier in `engine/src/ww_engine/db.py` (ww-core connection reuse + `PRAGMA table_info` guarded `ADD COLUMN` + `CREATE TABLE IF NOT EXISTS` + indexes) exactly per `contracts/db-migration.md` and `data-model.md`
-- [ ] T006 [P] Implement `engine/src/ww_engine/runs.py` — `engine_runs` lifecycle (start/finish, `outcome` completed/capped/error, `counts` JSON), idempotency guard helper, fail-loud recorder (Article 11/12)
-- [ ] T007 [P] Implement `engine/src/ww_engine/cost.py` — `token_ledger` writer (stage-tagged) + per-email/per-stage rollup query (FR-026/027, SC-011)
-- [ ] T008 [P] Implement `engine/src/ww_engine/rotation.py` — 3 rotation groups + `stable_hash(lead.id)%3` balanced assignment (research R6, FR-011/012)
-- [ ] T009 Implement `engine/src/ww_engine/selection.py` — deterministic eligibility query (FR-001/002/003: touch<3, ≥14d, active) with hooks for the reply/bounce exclusion and the detect-freshness guard (filled by US3)
-- [ ] T010 Implement Drafter seam in `engine/src/ww_engine/drafting/base.py` — `Drafter` Protocol, `DraftRequest`/`DraftResult`, `DraftError`/`DrafterCapReached`, and the deterministic FR-013 named-account guard (post-check on body) per `contracts/drafter.md`
-- [ ] T011 [P] Implement `engine/src/ww_engine/drafting/personalization.py` — layered context: official datasets → org site → public web; LinkedIn manual hook; `thin` flag when none (FR-010)
-- [ ] T012 Implement `engine/src/ww_engine/drafting/claude_code.py` — `ClaudeCodeDrafter` (subprocess `claude -p --output-format json`, parse text+usage→cost.py, raise `DrafterCapReached` on cap) per research R4
-- [ ] T013 Implement `engine/src/ww_engine/cli.py` skeleton + `init` and `enroll` commands (Typer/rich; `--db` default `data/leads.db`) per `contracts/cli.md`
-- [ ] T014 [P] Foundational tests in `engine/tests/`: migration idempotency happy+error (`tests/unit/test_db_migration.py`), selection eligibility happy+error (`tests/unit/test_selection.py`), rotation balance happy+error (`tests/unit/test_rotation.py`), Drafter seam contract with a fake drafter (`tests/contract/test_drafter.py`), cost ledger happy+error (`tests/unit/test_cost.py`)
+- [X] T004 Implement structured logger in `engine/src/ww_engine/logging.py` — emits `{action, module:"engine", customer_id, campaign_id, lead_id?, ts}`; helper asserts no email/name/body is ever passed (Article 3 & 10). Built first; every later task uses it.
+- [X] T005 Write `engine/schema_engine.sql` and the idempotent applier in `engine/src/ww_engine/db.py` (ww-core connection reuse + `PRAGMA table_info` guarded `ADD COLUMN` + `CREATE TABLE IF NOT EXISTS` + indexes) exactly per `contracts/db-migration.md` and `data-model.md`
+- [X] T006 [P] Implement `engine/src/ww_engine/runs.py` — `engine_runs` lifecycle (start/finish, `outcome` completed/capped/error, `counts` JSON), idempotency guard helper, fail-loud recorder (Article 11/12)
+- [X] T007 [P] Implement `engine/src/ww_engine/cost.py` — `token_ledger` writer (stage-tagged) + per-email/per-stage rollup query (FR-026/027, SC-011)
+- [X] T008 [P] Implement `engine/src/ww_engine/rotation.py` — 3 rotation groups + `stable_hash(lead.id)%3` balanced assignment (research R6, FR-011/012)
+- [X] T009 Implement `engine/src/ww_engine/selection.py` — deterministic eligibility query (FR-001/002/003: touch<3, ≥14d, active) with hooks for the reply/bounce exclusion and the detect-freshness guard (filled by US3)
+- [X] T010 Implement Drafter seam in `engine/src/ww_engine/drafting/base.py` — `Drafter` Protocol, `DraftRequest`/`DraftResult`, `DraftError`/`DrafterCapReached`, and the deterministic FR-013 named-account guard (post-check on body) per `contracts/drafter.md`
+- [X] T011 [P] Implement `engine/src/ww_engine/drafting/personalization.py` — layered context: official datasets → org site → public web; LinkedIn manual hook; `thin` flag when none (FR-010)
+- [X] T012 Implement `engine/src/ww_engine/drafting/claude_code.py` — `ClaudeCodeDrafter` (subprocess `claude -p --output-format json`, parse text+usage→cost.py, raise `DrafterCapReached` on cap) per research R4
+- [X] T013 Implement `engine/src/ww_engine/cli.py` skeleton + `init` and `enroll` commands (Typer/rich; `--db` default `data/leads.db`) per `contracts/cli.md`
+- [X] T014 [P] Foundational tests in `engine/tests/`: migration idempotency happy+error (`tests/unit/test_db_migration.py`), selection eligibility happy+error (`tests/unit/test_selection.py`), rotation balance happy+error (`tests/unit/test_rotation.py`), Drafter seam contract with a fake drafter (`tests/contract/test_drafter.py`), cost ledger happy+error (`tests/unit/test_cost.py`)
 
 **Checkpoint**: foundation ready — selection/rotation/drafter/db/logging/cost all unit-green.
 

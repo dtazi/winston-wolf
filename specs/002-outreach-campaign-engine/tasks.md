@@ -111,11 +111,11 @@ User stories (from spec.md): **US1** validate first batch in review mode (P1, MV
 
 ## Phase 6: Polish & Cross-Cutting
 
-- [ ] T035 [P] Run quickstart.md end-to-end against a seeded test `leads.db`; fix any drift
-- [ ] T036 [P] Security pass: grep logs/tests to assert no email/name/body (Article 3); confirm secrets only via `outreach/.env`/token file
-- [ ] T037 [P] Add the Article 12 stop-and-diagnose note + cron layout to `engine/README.md`
-- [ ] T038 [P] Extra unit tests in `engine/tests/unit/` beyond the Article 8 minimum (marker matching, NDR parsing, window edges, rotation distribution at N=200)
-- [ ] T039 Update root project status (README "active feature" line) and `data/` notes if needed
+- [X] T035 [P] Run quickstart.md end-to-end against a seeded test `leads.db`; fix any drift
+- [X] T036 [P] Security pass: grep logs/tests to assert no email/name/body (Article 3); confirm secrets only via `outreach/.env`/token file
+- [X] T037 [P] Add the Article 12 stop-and-diagnose note + cron layout to `engine/README.md`
+- [X] T038 [P] Extra unit tests in `engine/tests/unit/` beyond the Article 8 minimum (marker matching, NDR parsing, window edges, rotation distribution at N=200)
+- [X] T039 Update root project status (README "active feature" line) and `data/` notes if needed
 
 ---
 

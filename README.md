@@ -12,4 +12,4 @@ The architecture is multi-tenant from day one and industry-adaptive by design: i
 - **Dashboard** — control surface plus a lightweight CRM.
 
 ## Status
-Currently in design. No application code yet. Active feature: [`specs/001-dashboard-skeleton/`](specs/001-dashboard-skeleton/). Project rules live in [`.specify/memory/constitution.md`](.specify/memory/constitution.md). Strategic considerations live in [`VISION.md`](VISION.md).
+Outreach pillar building. Shipped modules: [`core/`](core/) (lead DB + brief/pitch), [`tracking/`](tracking/) (open-pixel + click redirector), [`outreach/`](outreach/) (M365 send/auth), [`evaluation/`](evaluation/) (Scout vendor bake-off), and [`engine/`](engine/) — the self-running outreach campaign engine ([`specs/002-outreach-campaign-engine/`](specs/002-outreach-campaign-engine/), implemented + tested). Next planned: [`specs/001-dashboard-skeleton/`](specs/001-dashboard-skeleton/). Project rules live in [`.specify/memory/constitution.md`](.specify/memory/constitution.md); strategy in [`VISION.md`](VISION.md).

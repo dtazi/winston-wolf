@@ -6,7 +6,8 @@ This file captures strategic ideas under consideration for future phases. These 
 
 These are deliberate strategic exclusions, not oversights. Re-opening any of them requires an explicit decision. (Constitutional rules live in `.specify/memory/constitution.md` and are not repeated here.)
 
-- **No scraping behind-login databases or attendee lists.** Conflicts with source-platform terms of service and platform reputation. Public exhibitor lists, speaker lists, and post-event press are acceptable.
+_2026-05-19: the former "no scraping behind-login databases / attendee lists" exclusion was removed by explicit decision. Operating principle: keep data-source doors open early; add a restriction only when lived experience shows a concrete reason for it, not preemptively._
+
 - **No "framework for any outreach use case."** Industry-adaptive is not industry-agnostic. The framework trap is a known anti-goal.
 - **No hardcoded industry concepts in the core schema.** No enum values like "hotel opening" or "plastics buyer" in core schema. Industry knowledge lives in configuration, prompts, data sources, and tenant settings.
 - **No "any B2B" Phase 2 generality.** Phase 2 is deliberate vertical-by-vertical evaluation, not blanket horizontal expansion.

@@ -49,17 +49,17 @@ User stories (from spec.md): **US1** validate first batch in review mode (P1, MV
 
 ### Tests for User Story 1 (REQUIRED — Article 8) ⚠️
 
-- [ ] T015 [P] [US1] Happy-path integration test in `engine/tests/integration/test_us1_review_happy.py` — draft→review→reject/edit/approve-all→deliver; assert rejected never sent, edited uses operator text, recipe+sent event written, marker header set (fake Graph + fake drafter)
-- [ ] T016 [P] [US1] Error-path test in `engine/tests/integration/test_us1_review_errors.py` — unapproved draft never delivered in review mode; `deliver` outside the configured window is a no-op (exit 0); thin-personalization draft is flagged
+- [X] T015 [P] [US1] Happy-path integration test in `engine/tests/integration/test_us1_review_happy.py` — draft→review→reject/edit/approve-all→deliver; assert rejected never sent, edited uses operator text, recipe+sent event written, marker header set (fake Graph + fake drafter)
+- [X] T016 [P] [US1] Error-path test in `engine/tests/integration/test_us1_review_errors.py` — unapproved draft never delivered in review mode; `deliver` outside the configured window is a no-op (exit 0); thin-personalization draft is flagged
 
 ### Implementation for User Story 1
 
-- [ ] T017 [US1] Implement `engine/src/ww_engine/modes.py` — `review`/`autonomous` campaign mode + per-email approval state machine (`pending→approved/edited/rejected→delivered`), default `review` (FR-004/021, Article 6)
-- [ ] T018 [US1] Implement the draft pass in `engine/src/ww_engine/cli.py` `draft` command — select (T009) → assign angle from rotation (T008) → personalization (T011) → Drafter (T010/T012) → write `send_drafts` (pending) → ledger tokens (T007); batch+cap-aware via runs.py (T006)
-- [ ] T019 [P] [US1] Implement `review`, `approve`, `reject`, `edit --body-file`, `approve-all` commands in `engine/src/ww_engine/cli.py` per `contracts/cli.md` (records each action; `edit` preserves `body_text_original`)
-- [ ] T020 [US1] Implement `engine/src/ww_engine/sender.py` — window gate (single configured US-business-hours window, FR-016/017), `ww-outreach` send, pixel+click token injection (`ww-tracking` schema), `X-WW-Send` marker header + capture `conversation_id`/`internet_message_id` (FR-009c, research R3), write `sends` row + `sent` event, mark draft delivered
-- [ ] T021 [US1] Implement `deliver` command in `cli.py` — review-mode gate (only approved/edited), pre-send eligibility re-check stub (completed in US3 T026), in-window only; plus `status` and `costs` commands
-- [ ] T022 [US1] Add logging for all US1 actions (draft, model_call, approve/reject/edit, schedule, deliver) via T004
+- [X] T017 [US1] Implement `engine/src/ww_engine/modes.py` — `review`/`autonomous` campaign mode + per-email approval state machine (`pending→approved/edited/rejected→delivered`), default `review` (FR-004/021, Article 6)
+- [X] T018 [US1] Implement the draft pass in `engine/src/ww_engine/cli.py` `draft` command — select (T009) → assign angle from rotation (T008) → personalization (T011) → Drafter (T010/T012) → write `send_drafts` (pending) → ledger tokens (T007); batch+cap-aware via runs.py (T006)
+- [X] T019 [P] [US1] Implement `review`, `approve`, `reject`, `edit --body-file`, `approve-all` commands in `engine/src/ww_engine/cli.py` per `contracts/cli.md` (records each action; `edit` preserves `body_text_original`)
+- [X] T020 [US1] Implement `engine/src/ww_engine/sender.py` — window gate (single configured US-business-hours window, FR-016/017), `ww-outreach` send, pixel+click token injection (`ww-tracking` schema), `X-WW-Send` marker header + capture `conversation_id`/`internet_message_id` (FR-009c, research R3), write `sends` row + `sent` event, mark draft delivered
+- [X] T021 [US1] Implement `deliver` command in `cli.py` — review-mode gate (only approved/edited), pre-send eligibility re-check stub (completed in US3 T026), in-window only; plus `status` and `costs` commands
+- [X] T022 [US1] Add logging for all US1 actions (draft, model_call, approve/reject/edit, schedule, deliver) via T004
 
 **Checkpoint**: MVP — operator can run a validated, reviewed first batch end-to-end. STOP and validate against quickstart.md §3.
 

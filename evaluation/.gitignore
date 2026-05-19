@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+dist/
+build/
+
+# Environment — never commit real API keys
+.env
+
+# Raw vendor responses (can grow large; scored summaries in history/ are tracked)
+results/raw/
+
+# OS
+.DS_Store

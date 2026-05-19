@@ -285,6 +285,19 @@ def deliver(campaign: str = typer.Option(..., "--campaign"),
     console.print(f"[green]Deliver pass[/green]: {counts}")
 
 
+@app.command()
+def detect(campaign: str = typer.Option(..., "--campaign"),
+           db_path: Path = _DB) -> None:
+    """Detect pass: poll the mailbox, log replies/bounces, halt sequences."""
+    from .detector import GraphMailReader, run_detect
+    conn = db.get_connection(db_path)
+    try:
+        counts = run_detect(conn, campaign, GraphMailReader())
+    finally:
+        conn.close()
+    console.print(f"[green]Detect pass[/green]: {counts}")
+
+
 @app.command("go-autonomous")
 def go_autonomous(campaign: str = typer.Option(..., "--campaign"),
                   db_path: Path = _DB) -> None:
@@ -322,6 +335,13 @@ def status(campaign: str = typer.Option(..., "--campaign"),
             "SELECT review_state s, COUNT(*) n FROM send_drafts WHERE "
             "campaign_id=? GROUP BY s", (campaign,)).fetchall()
         fresh = runs.detect_is_fresh(conn, campaign)
+        # Manual LinkedIn task paired to touch 2 (FR-008/022): due while the
+        # lead is active, cancelled the moment the sequence is halted.
+        li = conn.execute(
+            "SELECT l.sequence_state s, COUNT(*) n FROM leads l "
+            "WHERE l.campaign_id=? AND EXISTS (SELECT 1 FROM sends s2 "
+            "WHERE s2.lead_id=l.id AND s2.touch_number=2) GROUP BY l.sequence_state",
+            (campaign,)).fetchall()
         last = conn.execute(
             "SELECT pass, outcome, MAX(started_at) t FROM engine_runs WHERE "
             "campaign_id=? GROUP BY pass", (campaign,)).fetchall()
@@ -332,6 +352,10 @@ def status(campaign: str = typer.Option(..., "--campaign"),
     t.add_row("sequence", ", ".join(f"{r['s']}={r['n']}" for r in seq) or "—")
     t.add_row("drafts", ", ".join(f"{r['s']}={r['n']}" for r in drafts) or "—")
     t.add_row("detect fresh", "[green]yes[/green]" if fresh else "[red]NO[/red]")
+    li_due = sum(r["n"] for r in li if r["s"] == "active")
+    li_cancelled = sum(r["n"] for r in li if r["s"] != "active")
+    t.add_row("linkedin tasks (touch 2)",
+              f"due={li_due}, cancelled={li_cancelled}")
     for r in last:
         t.add_row(f"last {r['pass']}", f"{r['outcome']} @ {r['t']}")
     console.print(t)

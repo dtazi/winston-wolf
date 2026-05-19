@@ -73,15 +73,15 @@ User stories (from spec.md): **US1** validate first batch in review mode (P1, MV
 
 ### Tests for User Story 3 (REQUIRED — Article 8) ⚠️
 
-- [ ] T023 [P] [US3] Happy-path test in `engine/tests/integration/test_us3_hardstop_happy.py` — `replied` halts (no further draft/deliver), `bounced` excludes, LinkedIn task marked cancelled, detector matches reply by conversation_id and bounce by NDR+marker (fake Graph)
-- [ ] T024 [P] [US3] Error-path test in `engine/tests/integration/test_us3_hardstop_errors.py` — auto-reply/OOO NOT treated as reply; Graph-unreachable → `engine_runs.outcome='error'` and selection refuses to advance; reply arriving between draft and deliver cancels the send
+- [X] T023 [P] [US3] Happy-path test in `engine/tests/integration/test_us3_hardstop_happy.py` — `replied` halts (no further draft/deliver), `bounced` excludes, LinkedIn task marked cancelled, detector matches reply by conversation_id and bounce by NDR+marker (fake Graph)
+- [X] T024 [P] [US3] Error-path test in `engine/tests/integration/test_us3_hardstop_errors.py` — auto-reply/OOO NOT treated as reply; Graph-unreachable → `engine_runs.outcome='error'` and selection refuses to advance; reply arriving between draft and deliver cancels the send
 
 ### Implementation for User Story 3
 
-- [ ] T025 [US3] Implement `engine/src/ww_engine/detector.py` + `detect` CLI command — Graph inbox poll, match rules in priority order, auto-reply ignore, write `replied`/`bounced` events, set `leads.sequence_state`, void non-delivered drafts, dedupe, fail-loud per `contracts/detector.md`
-- [ ] T026 [US3] Complete the hard-stop enforcement: fill the selection.py reply/bounce exclusion + detect-freshness guard (T009 hooks), and the `deliver` pre-send re-check (T021 stub) so an ineligible lead is never sent (FR-007/009/009b)
-- [ ] T027 [US3] Implement manual-LinkedIn-task surfacing + cancel-on-halt in `status` output (FR-008/022)
-- [ ] T028 [US3] Add logging for detect runs, matches, halts, and refuse-to-advance events via T004
+- [X] T025 [US3] Implement `engine/src/ww_engine/detector.py` + `detect` CLI command — Graph inbox poll, match rules in priority order, auto-reply ignore, write `replied`/`bounced` events, set `leads.sequence_state`, void non-delivered drafts, dedupe, fail-loud per `contracts/detector.md`
+- [X] T026 [US3] Complete the hard-stop enforcement: fill the selection.py reply/bounce exclusion + detect-freshness guard (T009 hooks), and the `deliver` pre-send re-check (T021 stub) so an ineligible lead is never sent (FR-007/009/009b)
+- [X] T027 [US3] Implement manual-LinkedIn-task surfacing + cancel-on-halt in `status` output (FR-008/022)
+- [X] T028 [US3] Add logging for detect runs, matches, halts, and refuse-to-advance events via T004
 
 **Checkpoint**: the safety guarantee is real and tested; autonomous mode is now safe to build.
 

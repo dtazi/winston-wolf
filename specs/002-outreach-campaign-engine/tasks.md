@@ -95,15 +95,15 @@ User stories (from spec.md): **US1** validate first batch in review mode (P1, MV
 
 ### Tests for User Story 2 (REQUIRED — Article 8) ⚠️
 
-- [ ] T029 [P] [US2] Happy-path test in `engine/tests/integration/test_us2_autonomous_happy.py` — autonomous mode, 14d elapsed → touch 2 then 3 with correct rotation angles + recipe; no touch 4; no operator action
-- [ ] T030 [P] [US2] Error-path test in `engine/tests/integration/test_us2_autonomous_errors.py` — <14d no send; double `draft` run no duplicate (idempotency); `DrafterCapReached` mid-batch → run `capped`, next run resumes exactly remaining leads
+- [X] T029 [P] [US2] Happy-path test in `engine/tests/integration/test_us2_autonomous_happy.py` — autonomous mode, 14d elapsed → touch 2 then 3 with correct rotation angles + recipe; no touch 4; no operator action
+- [X] T030 [P] [US2] Error-path test in `engine/tests/integration/test_us2_autonomous_errors.py` — <14d no send; double `draft` run no duplicate (idempotency); `DrafterCapReached` mid-batch → run `capped`, next run resumes exactly remaining leads
 
 ### Implementation for User Story 2
 
-- [ ] T031 [P] [US2] Implement `go-autonomous` / `go-review` commands in `cli.py` (explicit, reversible mode flip; FR-004)
-- [ ] T032 [US2] Implement autonomous path in modes.py/draft pass — auto-create drafts as `approved`, advance `current_touch`, next-angle selection across touches 2→3, terminal at 3 (FR-002/011)
-- [ ] T033 [US2] Harden idempotency + cap resume across the draft/deliver passes using runs.py (T006) and the `uq_drafts_live_touch` partial index (FR-005/006, SC-003/008)
-- [ ] T034 [US2] Add logging for mode changes, autonomous draft cycles, cap/resume via T004
+- [X] T031 [P] [US2] Implement `go-autonomous` / `go-review` commands in `cli.py` (explicit, reversible mode flip; FR-004)
+- [X] T032 [US2] Implement autonomous path in modes.py/draft pass — auto-create drafts as `approved`, advance `current_touch`, next-angle selection across touches 2→3, terminal at 3 (FR-002/011)
+- [X] T033 [US2] Harden idempotency + cap resume across the draft/deliver passes using runs.py (T006) and the `uq_drafts_live_touch` partial index (FR-005/006, SC-003/008)
+- [X] T034 [US2] Add logging for mode changes, autonomous draft cycles, cap/resume via T004
 
 **Checkpoint**: all three stories independently functional; campaign "lives on its own".
 

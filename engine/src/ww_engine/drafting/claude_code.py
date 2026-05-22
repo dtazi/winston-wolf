@@ -26,25 +26,73 @@ _CAP_SIGNALS = (
 
 def _build_prompt(req: DraftRequest) -> str:
     facts = "\n".join(f"- {f}" for f in req.personalization.get("facts", [])) \
-        or "- (no specific personalization available; keep the opening generic)"
+        or "- (no specific personalization available; keep the opening generic and recipient-first)"
+    audience = (req.lead.get("audience") or "direct_buyer").lower()
+    cta_block = (
+        "CTA: invite them to visit the Richbond factory in Morocco "
+        "(GPO/large operators audit suppliers; this is appropriate for them)."
+        if audience == "gpo"
+        else
+        "CTA: offer to ship a sample to their facilities team, no call required."
+    )
+    spotlight = {
+        "china_plus_one":
+            "the China-alternative frame — supply-chain certainty after a "
+            "decade of disruption, tariff exposure, lead-time volatility.",
+        "60_years_experience":
+            "Richbond's 60 years of institutional manufacturing and "
+            "established credibility as a European-market alternative.",
+        "trusted_by_heavyweights":
+            "trusted-by-heavyweights credibility (unnamed) + the Morocco-US "
+            "Free Trade Agreement / TAA-compliance closer.",
+    }.get(req.value_angle, req.value_angle)
+    subject_tone = (
+        "specific and procurement-relevant (e.g., 'X for Y member contracts')"
+        if audience == "gpo"
+        else
+        "oblique and recipient-relevant — never blunt frames like "
+        "'China-alternative source' in the subject; lead with the recipient's "
+        "situation instead"
+    )
     return f"""You write one short B2B cold outreach email for Richbond, a \
-Moroccan institutional mattress/bedding manufacturer. Touch \
+60-year-old Moroccan institutional mattress/bedding manufacturer. Touch \
 {req.touch_number} of 3.
 
-VALUE ANGLE to lead with (use ONLY this angle): {req.value_angle}
+PITCH TEMPLATE (every email must hit all of these):
+  1. Subject + opening: personalized to the recipient using the lead context
+     below. Subject tone is {subject_tone}. The opening is recipient-first
+     ("We thought X would want to know"), never about us first.
+  2. Credibility stack: 60-year-old company; you MAY name Simmons Beautyrest
+     and Silentnight as brands Richbond has been trusted by (phrase as
+     "trusted by brands such as Simmons Beautyrest and Silentnight" or
+     similar). These are the ONLY two brand names permitted — every other
+     named customer / partner / retailer is prohibited (no IKEA, no named
+     hotel chains, no named hospitals). Also mention Richbond is a credible
+     alternative for European institutions.
+  3. China-alternative frame for buyers who have felt the past decade of
+     supply-chain disruption (tariffs, lead-times, geopolitics).
+  4. Soft intent: "make first contact" — never a hard pitch.
+  5. {cta_block}
+  6. Closer: collaboration is commercially clean — Morocco-US FTA in force,
+     TAA-compliant origin.
 
-Lead context:
+SPOTLIGHT FOR THIS TOUCH (give this the most weight, ~40% of the body):
+  {spotlight}
+
+LEAD CONTEXT (use these facts; do not invent any):
 {facts}
 
-Pitch (offer): {json.dumps(req.pitch)[:1500]}
-Audience note: {json.dumps(req.brief_excerpt)[:800]}
+PITCH JSON: {json.dumps(req.pitch)[:1500]}
+BRIEF JSON: {json.dumps(req.brief_excerpt)[:800]}
 
-Rules:
-- Plain text, < 130 words, professional industrialist tone.
-- Personalized opening from the lead context above; never invent facts.
-- Express exactly the value angle "{req.value_angle}".
-- NEVER name or hint at any specific Richbond customer or reference account.
-- One soft CTA (sample + short call).
+RULES:
+- Plain text, 120-150 words MAXIMUM — be disciplined; do not pad.
+- Sign every email exactly as:
+    Djaafar Tazi
+    Richbond Export
+- NEVER name any reference customer/partner/retailer other than Simmons
+  Beautyrest and Silentnight (the only two permitted names).
+- Subject line is short, specific to the recipient, no clickbait.
 
 Return STRICT JSON only: {{"subject": "...", "body": "..."}}"""
 

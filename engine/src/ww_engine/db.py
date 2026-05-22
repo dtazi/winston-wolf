@@ -25,6 +25,9 @@ _ADD_COLUMNS: list[tuple[str, str, str]] = [
      "CHECK (sequence_state IN "
      "('active','halted_reply','halted_bounce','completed'))"),
     ("leads", "current_touch", "current_touch INTEGER NOT NULL DEFAULT 0"),
+    ("leads", "audience",
+     "audience TEXT NOT NULL DEFAULT 'direct_buyer' "
+     "CHECK (audience IN ('direct_buyer','gpo'))"),
     ("sends", "touch_number", "touch_number INTEGER"),
     ("sends", "value_angle", "value_angle TEXT"),
     ("sends", "message_recipe", "message_recipe TEXT"),

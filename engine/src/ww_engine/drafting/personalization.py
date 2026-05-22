@@ -12,8 +12,11 @@ from typing import Any
 
 
 def gather(lead: dict[str, Any]) -> dict[str, Any]:
-    """Return {level, facts}. v1 = the dataset floor from the lead row; site/
-    web/linkedin are pluggable later behind this same shape."""
+    """Return {level, facts}. Layered:
+      - dataset floor from the lead row (company/title/region/size)
+      - sharp facts from `lead.notes` (operator-curated or web-sourced)
+    level escalates to 'web' when notes are present, 'thin' when nothing is.
+    """
     facts: list[str] = []
 
     title = (lead.get("person_title") or "").strip()
@@ -30,7 +33,15 @@ def gather(lead: dict[str, Any]) -> dict[str, Any]:
     if size and size != "unknown":
         facts.append(f"size band: {size}")
 
+    level = "dataset"
+    notes = (lead.get("notes") or "").strip()
+    if notes:
+        for line in notes.splitlines():
+            line = line.strip()
+            if line:
+                facts.append(f"context: {line}")
+        level = "web"
+
     if not facts:
         return {"level": "thin", "facts": []}
-    # Dataset-floor level: real, true, specific, but not a news hook.
-    return {"level": "dataset", "facts": facts}
+    return {"level": level, "facts": facts}

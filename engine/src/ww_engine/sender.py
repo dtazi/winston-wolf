@@ -39,7 +39,9 @@ def next_window_slot(now: datetime | None = None) -> str:
             break
         cur += timedelta(hours=1)
         cur = cur.replace(minute=0, second=0, microsecond=0)
-    return cur.astimezone(ZoneInfo("UTC")).isoformat()
+    # SQLite-friendly format (avoids the deprecated TIMESTAMP converter
+    # choking on ISO timezone suffixes).
+    return cur.astimezone(ZoneInfo("UTC")).strftime("%Y-%m-%d %H:%M:%S")
 
 
 class Transport(Protocol):

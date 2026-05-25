@@ -28,12 +28,27 @@ def _build_prompt(req: DraftRequest) -> str:
     facts = "\n".join(f"- {f}" for f in req.personalization.get("facts", [])) \
         or "- (no specific personalization available; keep the opening generic and recipient-first)"
     audience = (req.lead.get("audience") or "direct_buyer").lower()
+    # CTA anchored in Josh Braun's cold-email research: the worst-performing
+    # asks are time-commitment requests; the best are low-friction yes/no
+    # interest gauges or asset offers. NEVER offer a physical mattress sample
+    # (institutional mattresses are too large/expensive to ship as
+    # speculative samples).
     cta_block = (
-        "CTA: invite them to visit the Richbond factory in Morocco "
-        "(GPO/large operators audit suppliers; this is appropriate for them)."
+        "CTA: a soft yes/no interest gauge that opens the door to a "
+        "factory audit when their next supplier-qualification cycle starts. "
+        "Use phrasing like 'Worth being on the bidders list for the next "
+        "furnishings re-bid?' or 'Open to an introductory technical brief "
+        "by email — no call needed?'. Do NOT ask for a meeting time. Do "
+        "NOT offer to ship a physical mattress."
         if audience == "gpo"
         else
-        "CTA: offer to ship a sample to their facilities team, no call required."
+        "CTA: a low-friction asset-offer in the Josh Braun style. Offer to "
+        "send a one-page institutional capability brief (or a short factory "
+        "tour link) BY EMAIL, no call required, framed as a yes/no interest "
+        "gauge: 'Worth a one-pager by email?' or 'Open to a 2-minute factory "
+        "tour link?'. Do NOT ask for a meeting time. Do NOT offer to ship "
+        "a physical mattress (institutional mattresses are too large/"
+        "expensive to ship speculatively)."
     )
     spotlight = {
         "china_plus_one":
@@ -46,13 +61,23 @@ def _build_prompt(req: DraftRequest) -> str:
             "trusted-by-heavyweights credibility (unnamed) + the Morocco-US "
             "Free Trade Agreement / TAA-compliance closer.",
     }.get(req.value_angle, req.value_angle)
+    # Subject style anchored in 2025 B2B cold-email research (Jason Bay /
+    # Outbound Squad: "internal camouflage", <5 words, you-centric;
+    # Belkins/Amplemarket 2025 data: 2-4 word subjects ~46% open rate;
+    # avoid marketing jargon and "ASAP"/urgency tones).
     subject_tone = (
-        "specific and procurement-relevant (e.g., 'X for Y member contracts')"
+        "3-5 words, peer-to-peer tone (as if a colleague at MHEC/E&I wrote "
+        "to another), refer to the recipient's procurement world not our "
+        "product (good: 'supplier qualification thoughts', 'on Midwest "
+        "sourcing'; bad: 'A China-alternative source for...')"
         if audience == "gpo"
         else
-        "oblique and recipient-relevant — never blunt frames like "
-        "'China-alternative source' in the subject; lead with the recipient's "
-        "situation instead"
+        "3-5 words AFTER the [Richbond] tag, peer-to-peer internal tone — "
+        "as if a colleague in the recipient's own housing office wrote it. "
+        "Refer to THEIR situation/topic, not our product. NO marketing "
+        "language. Good: 'on your refresh cycle', 'dorm sourcing question', "
+        "'a thought for fall'. Bad: 'Bedding refresh planning at...', "
+        "'A China-alternative source...'"
     )
     return f"""You write one short B2B cold outreach email for Richbond, a \
 60-year-old Moroccan institutional mattress/bedding manufacturer. Touch \

@@ -56,12 +56,20 @@ class GraphTransport:
 
     def __init__(self) -> None:
         import os as _os
+        from pathlib import Path as _Path
 
         import requests
         from dotenv import load_dotenv
         from ww_outreach import auth
 
-        load_dotenv()
+        # ww-outreach owns the M365 .env (single source of truth — Article 5);
+        # find it via the ww_outreach package install location rather than CWD.
+        import ww_outreach as _wwo
+        env_path = _Path(_wwo.__file__).resolve().parents[2] / ".env"
+        if env_path.exists():
+            load_dotenv(env_path)
+        else:
+            load_dotenv()  # fall back to CWD search
         cid = _os.environ["AZURE_CLIENT_ID"]
         tid = _os.environ["AZURE_TENANT_ID"]
         token = auth.acquire_token_silent(cid, tid)
@@ -71,28 +79,30 @@ class GraphTransport:
         self._requests = requests
 
     def send(self, message: dict[str, Any]) -> dict[str, str]:
+        # /me/sendMail works with the Mail.Send scope alone. It returns 202
+        # Accepted with no body, so we lose conversationId/messageId capture
+        # at send time — detector falls back to marker-token matching in body
+        # (contracts/detector.md rule 2). Custom X-WW-Send header is still
+        # set via internetMessageHeaders.
         h = {"Authorization": f"Bearer {self._token}",
              "Content-Type": "application/json"}
+        payload = {"message": message, "saveToSentItems": True}
         r = self._requests.post(
-            "https://graph.microsoft.com/v1.0/me/messages",
-            headers=h, json=message, timeout=30)
-        if r.status_code not in (200, 201):
-            raise RuntimeError(f"Graph create failed: {r.status_code} {r.text}")
-        m = r.json()
-        s = self._requests.post(
-            f"https://graph.microsoft.com/v1.0/me/messages/{m['id']}/send",
-            headers=h, timeout=30)
-        if s.status_code not in (200, 202):
-            raise RuntimeError(f"Graph send failed: {s.status_code} {s.text}")
-        return {"message_id": m.get("id", ""),
-                "conversation_id": m.get("conversationId", ""),
-                "internet_message_id": m.get("internetMessageId", "")}
+            "https://graph.microsoft.com/v1.0/me/sendMail",
+            headers=h, json=payload, timeout=30)
+        if r.status_code not in (200, 202):
+            raise RuntimeError(f"Graph sendMail failed: {r.status_code} {r.text}")
+        return {"message_id": "", "conversation_id": "",
+                "internet_message_id": ""}
 
 
-def _html(body_text: str, pixel_token: str) -> str:
+def _html(body_text: str, pixel_token: str, marker_token: str = "") -> str:
     pixel = f'<img src="{_TRACK_BASE}/pixel/{pixel_token}" width="1" height="1" alt="">'
     paras = "".join(f"<p>{ln}</p>" for ln in body_text.splitlines() if ln.strip())
-    return f"<html><body>{paras}{pixel}</body></html>"
+    # Invisible HTML comment carrying the marker so quoted replies still let
+    # the detector match (FR-009c). Comments survive in most reply clients.
+    marker = f"<!-- ww-marker: {marker_token} -->" if marker_token else ""
+    return f"<html><body>{paras}{pixel}{marker}</body></html>"
 
 
 def deliver_draft(conn: sqlite3.Connection, draft: sqlite3.Row,
@@ -106,7 +116,7 @@ def deliver_draft(conn: sqlite3.Connection, draft: sqlite3.Row,
     message = {
         "subject": draft["subject"],
         "body": {"contentType": "HTML",
-                 "content": _html(draft["body_text"], pixel_token)},
+                 "content": _html(draft["body_text"], pixel_token, marker)},
         "toRecipients": [{"emailAddress": {"address": _lead_email(conn, draft["lead_id"])}}],
         "internetMessageHeaders": [{"name": "X-WW-Send", "value": marker}],
     }

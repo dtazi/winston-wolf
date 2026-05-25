@@ -93,6 +93,9 @@ RULES:
 - NEVER name any reference customer/partner/retailer other than Simmons
   Beautyrest and Silentnight (the only two permitted names).
 - Subject line is short, specific to the recipient, no clickbait.
+- Subject MUST begin with the project tag "[Richbond] " (classic
+  mail-list-style prefix) so the operator can identify replies at a
+  glance in their inbox. Example: "[Richbond] Bedding refresh planning…".
 
 Return STRICT JSON only: {{"subject": "...", "body": "..."}}"""
 

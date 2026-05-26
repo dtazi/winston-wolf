@@ -87,13 +87,16 @@ PITCH TEMPLATE (every email must hit all of these):
   1. Subject + opening: personalized to the recipient using the lead context
      below. Subject tone is {subject_tone}. The opening is recipient-first
      ("We thought X would want to know"), never about us first.
-  2. Credibility stack: 60-year-old company; you MAY name Simmons Beautyrest
-     and Silentnight as brands Richbond has been trusted by (phrase as
-     "trusted by brands such as Simmons Beautyrest and Silentnight" or
-     similar). These are the ONLY two brand names permitted — every other
-     named customer / partner / retailer is prohibited (no IKEA, no named
-     hotel chains, no named hospitals). Also mention Richbond is a credible
-     alternative for European institutions.
+  2. Credibility stack: 60-year-old institutional manufacturer. State
+     Richbond's actual brand operations: "manufactures Simmons and
+     Beautyrest in Morocco and operates Silentnight in Kenya" (or a close
+     variant — these are owned/operated brand businesses, NOT customers
+     who "trusted" us; the ownership framing is materially stronger and
+     also legally accurate). Simmons, Beautyrest, and Silentnight are the
+     ONLY three brand names permitted in any email; all other named
+     customers/partners/retailers/competitors are prohibited (no IKEA, no
+     named hotel chains, no named hospitals). Also mention Richbond is a
+     credible alternative for European institutions.
   3. China-alternative frame for buyers who have felt the past decade of
      supply-chain disruption (tariffs, lead-times, geopolitics).
   4. Soft intent: "make first contact" — never a hard pitch.
@@ -112,15 +115,22 @@ BRIEF JSON: {json.dumps(req.brief_excerpt)[:800]}
 
 RULES:
 - Plain text, 120-150 words MAXIMUM — be disciplined; do not pad.
-- Sign every email exactly as:
+- Sign every email exactly as (the URL is mandatory — recipients verify
+  the company by clicking through, and the click is also our engagement
+  signal):
     Djaafar Tazi
     Richbond Export
-- NEVER name any reference customer/partner/retailer other than Simmons
-  Beautyrest and Silentnight (the only two permitted names).
+    https://richbondgroup.eu
+- NEVER name any reference customer/partner/retailer/competitor other
+  than Simmons, Beautyrest, and Silentnight (the only THREE permitted
+  brand names — these are Richbond's owned/operated brand operations,
+  not customers).
 - Subject line is short, specific to the recipient, no clickbait.
-- Subject MUST begin with the project tag "[Richbond] " (classic
-  mail-list-style prefix) so the operator can identify replies at a
-  glance in their inbox. Example: "[Richbond] Bedding refresh planning…".
+- Subject MUST end with the subtle marker " · Richbond" (space, middle
+  dot U+00B7, space, "Richbond" — no brackets, no quotes). This is a
+  signature-style suffix that survives "Re:" cleanly and lets the operator
+  recognise replies in their inbox without screaming "mass mail". Example:
+  "a thought for your refresh cycle · Richbond".
 
 Return STRICT JSON only: {{"subject": "...", "body": "..."}}"""
 

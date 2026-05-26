@@ -6,6 +6,37 @@ The companion doc [`email_structure.md`](./email_structure.md) describes the *cu
 
 ---
 
+## 2026-05-26 — subject marker swapped: `· Richbond` middle-dot suffix replaces `[Richbond]` prefix
+
+- **Change:** the project tag is now a quiet middle-dot suffix at the *end* of the subject (`a thought for your refresh cycle · Richbond`) rather than the bracketed mail-list prefix that was shipped on 2026-05-25.
+- **Why:** operator pushed back on the bracketed form as too tag-y / mass-mail-feeling. The middle-dot suffix reads as a signature continuation rather than a tag, still survives "Re:" cleanly, and preserves the inbox-recognition value for replies.
+- **Considered:** `Richbond:` prefix (rejected — still front-loaded and slightly vendor-y); `RB:` initials (rejected — too subtle to spot replies at a glance); no tag (rejected — operator explicitly wants reply visibility).
+- **Hypothesis introduced:** H7 in `email_playbook.md` — the suffix's effect on open rate is unmeasured; flagged for A/B test once a fork can run a no-suffix variant.
+- **Cross-ref:** [`email_playbook.md` §4](./email_playbook.md), [`email_foundation.md` §3](./email_foundation.md).
+
+---
+
+## 2026-05-26 — brand-ownership phrasing corrected (legal precision)
+
+- **Change:** the drafter previously claimed Richbond was *"trusted by brands such as Simmons Beautyrest and Silentnight"*. Operator clarified the actual relationship: Richbond **owns/operates** these brand businesses — *manufactures Simmons in Morocco*, *manufactures Beautyrest in Morocco*, *operates Silentnight in Kenya*. The prompt now states this explicitly.
+- **Why:** "trusted by" is materially different from "owns/operates" — the original phrasing was a soft-customer-of claim that could be legitimately challenged; the corrected phrasing is a verifiable ownership statement that is also a *stronger* credibility signal for institutional procurement (the company running Simmons in Morocco isn't a startup).
+- **Implications:**
+  - The named-account guard now permits **three** brand names (Simmons, Beautyrest, Silentnight as separate names), not two combined.
+  - The credibility stack in [`email_foundation.md` §3](./email_foundation.md) is rewritten accordingly.
+  - The stale "only two permitted names" line elsewhere in the drafter prompt was found and corrected in the same edit.
+- **Considered:** softer phrasings like *"has manufactured for"* — rejected because the operator confirmed the ownership/license relationship, which is the stronger and accurate claim. No reason to weaken it.
+
+---
+
+## 2026-05-26 — `https://richbondgroup.eu` added to mandatory signoff
+
+- **Change:** every email's signoff now includes the company URL on its own line. The drafter prompt makes this a mandatory rule.
+- **Why:** the 4 emails shipped on 2026-05-25 had **no URL**. A recipient curious to verify Richbond had nowhere to click. This is a foundational omission a non-negotiables checklist (now in [`email_foundation.md` §3](./email_foundation.md)) would have caught before send. The omission is exactly why we now have a checklist doc.
+- **URL choice:** richbondgroup.eu over richbond.ma / richbond.ci / grouperichbond.ma — the EU site is the right anchor for institutional US outreach (matches the "credible alternative for European institutions" positioning). Logged in the earlier 2026-05-26 URL-choice entry below.
+- **Click-tracking note:** the URL is currently inserted *unwrapped* — when the tracking server is deployed (separate work item), the drafter will wrap it through the click-redirector to capture click events as engagement signal.
+
+---
+
 ## 2026-05-26 — website URL chosen: `richbondgroup.eu`
 
 - **Change:** the drafter signature will link to [richbondgroup.eu](https://richbondgroup.eu/). Click-tracking wrapping is still pending the tracking-server deployment decision.

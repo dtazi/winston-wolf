@@ -1,0 +1,20 @@
+[Unit]
+Description=Winston Wolf tracking server (open pixel + click redirector)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Substitute YOUR_USER with the VPS user that owns the cloned repo
+# (e.g., `ww` if you created a dedicated service user, or `root` for the no-frills path).
+User=YOUR_USER
+WorkingDirectory=/home/YOUR_USER/winston-wolf/tracking
+Environment="WW_DATA_DIR=/home/YOUR_USER/winston-wolf/data"
+ExecStart=/home/YOUR_USER/.local/bin/uv run ww-tracking serve --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

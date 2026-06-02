@@ -1,5 +1,23 @@
 # Tracking server — deployment runbook
 
+> **⚠️ This runbook (Caddy + systemd) assumes a FRESH box. It is NOT how the
+> server is actually deployed on Zeno (`srv1553383`).** Zeno already runs
+> **traefik** as its public reverse proxy on ports 80/443, so installing Caddy
+> would collide with it, and editing traefik to reach a host process would
+> disrupt every other route on the box. The live deployment instead runs the
+> app as a **Docker container** that registers itself with traefik via labels —
+> see `tracking/Dockerfile` and `tracking/deploy/docker-compose.yml`. Deploy /
+> update with:
+>
+> ```
+> cd ~/winston-wolf && git pull
+> docker compose -f tracking/deploy/docker-compose.yml up -d --build
+> ```
+>
+> The DB-init steps below (uv + `ww-core init`) still apply. The steps that
+> install Caddy and the systemd unit do **not** — skip them on Zeno. Keep the
+> rest of this runbook only as a reference for a genuinely fresh host.
+
 One-shot deployment of `ww-tracking` to the Hostinger VPS. Run these steps in
 order from a fresh SSH session. Everything is idempotent — re-running steps is
 safe.

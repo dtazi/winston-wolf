@@ -1,0 +1,20 @@
+services:
+  ww-tracking:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: ww-tracking:latest
+    container_name: ww-tracking
+    restart: unless-stopped
+    # Loopback publish: lets us curl /healthz locally; public traffic arrives via traefik.
+    ports:
+      - "127.0.0.1:8000:8000"
+    # Shared lead DB, created on the host by `ww-core init`.
+    volumes:
+      - /home/djaafar/winston-wolf/data:/data
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.ww-tracking.rule=Host(`track.richbondgroup.eu`)
+      - traefik.http.routers.ww-tracking.entrypoints=websecure
+      - traefik.http.routers.ww-tracking.tls.certresolver=letsencrypt
+      - traefik.http.services.ww-tracking.loadbalancer.server.port=8000

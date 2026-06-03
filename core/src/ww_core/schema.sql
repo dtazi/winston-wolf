@@ -113,3 +113,59 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE INDEX IF NOT EXISTS idx_events_lead_time ON events(lead_id, timestamp);
 CREATE INDEX IF NOT EXISTS idx_events_type_time ON events(event_type, timestamp);
 CREATE INDEX IF NOT EXISTS idx_events_send ON events(send_id);
+
+-- ── Scout enrichment & qualification (feature 003) ──────────────────────────
+-- New leads columns (domain_status, person_status, person_email_status,
+-- enrichment_state) are added idempotently by db.migrate_schema(), since SQLite
+-- has no "ADD COLUMN IF NOT EXISTS". The tables below are create-if-not-exists.
+
+-- The per-campaign ideal-customer profile — the quality bar (FR-001).
+CREATE TABLE IF NOT EXISTS campaign_target_profiles (
+    id TEXT PRIMARY KEY,
+    customer_id TEXT NOT NULL REFERENCES customers(id),
+    campaign_id TEXT NOT NULL REFERENCES campaigns(id),
+    target_roles TEXT NOT NULL,          -- JSON list of title keywords
+    niche_id TEXT NOT NULL,
+    size_metric TEXT,                    -- e.g. 'beds', 'rooms', 'students'
+    size_min INTEGER,                    -- "big enough" threshold (per-campaign)
+    regions TEXT NOT NULL,               -- JSON list of {country, state}
+    description TEXT NOT NULL,            -- plain-language ICP, fed to the AI judge
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_ctp_campaign ON campaign_target_profiles(campaign_id);
+
+-- One live qualification verdict per lead (FR-004/005, R6 idempotency).
+CREATE TABLE IF NOT EXISTS qualification_verdicts (
+    id TEXT PRIMARY KEY,
+    customer_id TEXT NOT NULL REFERENCES customers(id),
+    campaign_id TEXT NOT NULL REFERENCES campaigns(id),
+    lead_id TEXT NOT NULL REFERENCES leads(id),
+    rules_outcome TEXT NOT NULL CHECK (rules_outcome IN ('pass', 'reject')),
+    rules_reason TEXT,
+    ai_score INTEGER CHECK (ai_score BETWEEN 0 AND 100),
+    ai_confidence TEXT CHECK (ai_confidence IN ('low', 'medium', 'high')),
+    ai_reason TEXT,
+    engine_used TEXT,
+    reflection_applied INTEGER NOT NULL DEFAULT 0,
+    verdict TEXT NOT NULL CHECK (verdict IN ('qualified', 'rejected', 'needs_review')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_qv_lead ON qualification_verdicts(lead_id);
+
+-- Per-action cost + audit ledger; engine/vendor-agnostic (Article 4/10, SC-003).
+CREATE TABLE IF NOT EXISTS enrichment_ledger (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id TEXT NOT NULL,
+    campaign_id TEXT NOT NULL,
+    lead_id TEXT REFERENCES leads(id),
+    stage TEXT NOT NULL CHECK (stage IN ('domain', 'person', 'judge', 'reflection', 'email')),
+    provider TEXT,
+    tokens_in INTEGER,
+    tokens_out INTEGER,
+    cost_usd REAL,
+    status TEXT CHECK (status IN ('ok', 'not_found', 'error')),
+    detail TEXT,
+    ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_ledger_campaign_stage ON enrichment_ledger(campaign_id, stage);

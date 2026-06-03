@@ -31,6 +31,36 @@ def init_schema(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
+# Columns added to `leads` by feature 003 (Scout enrichment). SQLite has no
+# "ADD COLUMN IF NOT EXISTS", so each is applied only when absent — making
+# `ww-core init` safe to re-run on a populated database.
+_LEADS_ADDED_COLUMNS: list[tuple[str, str]] = [
+    ("domain_status",
+     "TEXT CHECK (domain_status IN ('pending','found','not_found')) DEFAULT 'pending'"),
+    ("person_status",
+     "TEXT CHECK (person_status IN ('pending','found','not_found')) DEFAULT 'pending'"),
+    ("person_email_status",
+     "TEXT CHECK (person_email_status IN ('pending','verified','unverified','not_found')) DEFAULT 'pending'"),
+    ("enrichment_state",
+     "TEXT CHECK (enrichment_state IN "
+     "('new','enriched','qualified','rejected','needs_review','emailed','parked')) "
+     "NOT NULL DEFAULT 'new'"),
+]
+
+
+def migrate_schema(conn: sqlite3.Connection) -> list[str]:
+    """Idempotently add feature-003 columns to `leads`. Returns columns added."""
+    # row[1] = column name; index works regardless of the connection's row_factory.
+    existing = {row[1] for row in conn.execute("PRAGMA table_info(leads)")}
+    added: list[str] = []
+    for name, decl in _LEADS_ADDED_COLUMNS:
+        if name not in existing:
+            conn.execute(f"ALTER TABLE leads ADD COLUMN {name} {decl}")
+            added.append(name)
+    conn.commit()
+    return added
+
+
 SOURCE_CHANNELS_SEED: list[tuple[str, str, str, str, str | None, str | None]] = [
     # ---- Education ----
     ("ipeds", "IPEDS — Integrated Postsecondary Education Data System",
@@ -125,6 +155,7 @@ def init_database(db_path: Path = DEFAULT_DB_PATH) -> tuple[Path, int]:
     conn = get_connection(db_path)
     try:
         init_schema(conn)
+        migrate_schema(conn)
         new_channels = seed_source_channels(conn)
     finally:
         conn.close()

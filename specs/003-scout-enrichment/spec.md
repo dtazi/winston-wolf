@@ -129,6 +129,31 @@ borderline leads and can revise the first score; with it off, only one pass runs
 
 ---
 
+### User Story 6 - Choose which AI engine each tool uses (Priority: P2)
+
+From one central place, the user can assign which LLM engine powers each tool
+(e.g. Scout's judge on DeepSeek or GPT, Outreach on Opus), and can add a new
+engine later by supplying its access key and pointing a tool at it — with no code
+changes. Anything left unassigned uses a default engine.
+
+**Why this priority**: This is the user's stated infrastructure goal — start on
+one engine today, add other LLM providers freely later. Scout is the first
+consumer, but the capability is shared across modules.
+
+**Independent Test**: Assign Scout's judge to a non-default engine in the central
+config; confirm the judge calls that engine. Remove the assignment; confirm it
+falls back to the default engine.
+
+**Acceptance Scenarios**:
+
+1. **Given** no engine is assigned to a tool, **When** that tool makes an AI call,
+   **Then** it uses the default engine (the Claude subscription) with no error.
+2. **Given** a new engine is added to the central config with its key, **When** a
+   tool is pointed at it, **Then** that tool's AI calls use the new engine without
+   any code change.
+
+---
+
 ### Edge Cases
 
 - Company has no findable website → recorded as "not found", lead parked,
@@ -171,6 +196,13 @@ borderline leads and can revise the first score; with it off, only one pass runs
   what happened, which step, which tenant, and when.
 - **FR-012**: A reflection (AI self-check) pass MUST be available as an
   off-by-default option.
+- **FR-013**: Every AI call MUST run on an engine selected per tool from a
+  central engine registry; when a tool has no engine assigned, the default
+  engine (the Claude subscription) MUST be used.
+- **FR-014**: Adding a new LLM engine MUST require only configuration (supplying
+  its access key and assigning it to a tool), never changes to a module's code.
+- **FR-015**: Each engine's credentials MUST be read from the environment, never
+  stored in the registry file or in source.
 
 ### Key Entities
 
@@ -181,6 +213,9 @@ borderline leads and can revise the first score; with it off, only one pass runs
   company domain, the contact person (name + title), the qualification verdict
   (rules outcome + AI score + confidence + reason), and the email with a verified
   flag.
+- **Engine Registry**: the central "engine room" — the list of available LLM
+  engines (each with env-referenced access) and the mapping of which tool uses
+  which engine, plus a default engine. Shared across modules.
 
 ## Success Criteria *(mandatory)*
 
@@ -213,3 +248,8 @@ borderline leads and can revise the first score; with it off, only one pass runs
 - Adding more data sources (IPEDS, TABS, SHB, state licensure, etc.) is a
   separate later feature; this spec covers enrichment + qualification of leads
   from any existing source.
+- A shared LLM engine layer (the engine registry + per-provider adapters) is
+  introduced by this feature as reusable infrastructure, with Scout as its first
+  consumer; other modules (e.g. Outreach) migrate onto it later. It runs
+  independently of the separate Zeno model-router so that a router outage cannot
+  take Winston Wolf offline.

@@ -1,7 +1,7 @@
 # Winston Wolf — Project Constitution
 **Project:** winston-wolf  
 **Ratification Date:** 2026-05-04  
-**Last Amended:** 2026-05-14
+**Last Amended:** 2026-06-08
 
 ---
 
@@ -78,22 +78,38 @@ extension across industries. Industry knowledge lives in
 configuration, prompts, data sources, and tenant settings, 
 never in module internals.
 
-The platform has six distinct modules: Configuration, Scout, 
-Outreach, Engagement Tracker, Knowledge Base, Learning Engine. 
-Each module MUST be independently deployable and testable. 
-No module may be tightly coupled to another's internal logic — 
+The platform's modules sit in the **intelligence + workflow 
+layer**: Signal Filter, Knowledge Base, AI Writer, Approval 
+Workflow, and Learning Engine, surfaced through the Dashboard. 
+Each module MUST be independently deployable and testable. No 
+module may be tightly coupled to another's internal logic — 
 they communicate through defined interfaces only.
+
+All external systems — the sending tool, lead data, CRMs, 
+tracking signals — MUST be reached ONLY through a narrow 
+adapter layer. No module outside that adapter layer may know 
+that a specific vendor exists or call a vendor API directly. 
+This preserves the option to add or swap providers without 
+rewriting the system.
 
 ---
 
 ## Article 6 — Human Approval Gates
 
-The Outreach module MUST support an approval mode where emails 
-are queued for human review before sending. Fully automated mode 
-is optional and must be explicitly enabled per campaign. The 
-default for any new campaign is approval-required. The system 
-MUST never send emails without either explicit human approval 
-or explicit automation mode being turned on.
+Every new campaign starts in approval-required mode: each cold 
+email is reviewed by a human before sending. Autonomous mode is 
+optional, enabled only by an explicit, deliberate, per-campaign 
+operator action, and is reversible back to review at any time. 
+The system MUST never send an email without either recorded 
+human approval of that specific email or explicitly-enabled 
+automation.
+
+The approval gate exists so a human can apply industry knowledge 
+the AI lacks and catch fabricated or unauthorized content before 
+it reaches a prospect. At approval, the draft MUST show the AI's 
+reasoning and the source of every factual claim or offer it 
+makes, so the reviewer can distinguish grounded statements from 
+invented ones.
 
 ---
 
@@ -149,3 +165,80 @@ logs, identify the actual root cause, and propose a
 diagnosis before writing any more code. Fast broken 
 solutions are worse than slow correct ones. When in doubt, 
 the slower and more deliberate path is always preferred.
+
+---
+
+## Article 13 — Rent the Plumbing
+
+Winston Wolf builds only the intelligence and workflow layer. 
+It MUST NOT build commoditized sending infrastructure — lead 
+databases, email verification, domain purchasing, DNS 
+configuration, inbox provisioning, warm-up management, inbox 
+rotation, SMTP-level sending, infrastructure-level 
+deliverability monitoring, or compliance-link injection. These 
+are delegated to the integrated sending tool. Building them 
+ourselves would consume months and produce zero 
+differentiation; nobody chooses an outreach tool for the 
+elegance of its DKIM signing.
+
+---
+
+## Article 14 — Compliance is Enforced, Not Configured
+
+When the platform sends on behalf of a customer, the platform 
+is co-liable (CAN-SPAM per-email penalties, GDPR by recipient 
+location). Therefore suppression-list enforcement and opt-out 
+propagation MUST happen automatically on every send across all 
+campaigns. Compliance behavior MUST NOT be a tenant-toggleable 
+feature that anyone can forget to enable.
+
+---
+
+## Article 15 — The Reply Boundary
+
+When a prospect replies, the AI's scope for that prospect ends. 
+The system MUST record that a reply occurred, halt all further 
+outreach to that prospect, update the suppression list, and log 
+the event for the learning engine. The system MUST NOT read the 
+reply's content or draft a response. The conversation belongs 
+to the human salesperson from that point forward.
+
+---
+
+## Article 16 — Sending Hygiene
+
+Cold outreach MUST use secondary domains, never the tenant's 
+primary domain — the primary domain's reputation is reserved 
+for transactional and marketing email through the tenant's 
+existing infrastructure. Each tenant's sending reputation and 
+suppression lists MUST be isolated: one tenant's campaign 
+cannot poison another tenant's results.
+
+**Validation-pilot exception (added 2026-06-08).** Before the 
+platform is built at scale, a tenant MAY run a bounded, 
+time-boxed validation pilot that sends cold outreach from a 
+real tenant mailbox — including a primary-domain account — 
+when ALL of the following hold: (a) every send is 
+human-approved (Article 6); (b) daily volume stays low 
+(single/low-double digits) and the pilot is explicitly 
+time-boxed; (c) the reputation risk to the primary domain is 
+accepted in writing by the tenant as a deliberate experiment 
+cost. This exception exists to validate the outreach motion 
+before asking the tenant to buy and warm secondary domains. 
+Outside such a pilot, the secondary-domain rule above is 
+absolute, and a validated motion MUST migrate to 
+secondary-domain sending before scaling volume.
+
+---
+
+## Article 17 — Grounded Claims, No Fabricated Commitments
+
+The AI writer MUST NOT invent facts, capabilities, prices, lead 
+times, certifications, or offers/commitments (e.g. free samples, 
+discounts, guarantees). Every factual claim or offer in a draft 
+MUST be grounded in the tenant's knowledge base of approved 
+facts and offers. Anything not sourced from the knowledge base 
+MUST NOT appear as a commitment, and any unsourced or 
+low-confidence claim MUST be flagged at approval rather than 
+presented as fact. The knowledge base is the single source of 
+what the tenant is authorized to say.

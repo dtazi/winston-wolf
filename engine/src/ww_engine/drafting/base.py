@@ -28,6 +28,13 @@ class DraftRequest:
     value_angle: str
     touch_number: int
     personalization: dict[str, Any]  # {level, facts}
+    # 004 proof-of-life experiment grounding (all optional → 002 callers unaffected):
+    knowledge_base: str = ""             # the authorized facts/offers (Art 17)
+    strategies: list[dict[str, Any]] = field(default_factory=list)  # [{name,text}]
+    research: dict[str, Any] = field(default_factory=dict)          # ResearchResult
+    conclusions: str = ""                # what's working so far
+    feedback: list[str] = field(default_factory=list)              # recent comments
+    engagement_tier: str = ""            # clicked/opened/silent (follow-ups)
 
 
 @dataclass

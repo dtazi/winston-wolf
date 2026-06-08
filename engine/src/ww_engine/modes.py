@@ -31,9 +31,11 @@ def set_mode(conn: sqlite3.Connection, campaign_id: str, mode: str) -> None:
 
 
 def set_review_state(conn: sqlite3.Connection, draft_id: str, state: str,
-                     new_body: str | None = None) -> bool:
+                     new_body: str | None = None,
+                     comment: str | None = None) -> bool:
     """Apply an operator decision to one draft. Returns False if the draft is
-    missing or already terminal (cannot re-decide a delivered/rejected draft)."""
+    missing or already terminal (cannot re-decide a delivered/rejected draft).
+    `comment` captures the verdict rationale (FR-010) — the learning-loop input."""
     row = conn.execute(
         "SELECT review_state FROM send_drafts WHERE id=?", (draft_id,)
     ).fetchone()
@@ -42,14 +44,14 @@ def set_review_state(conn: sqlite3.Connection, draft_id: str, state: str,
     if state == "edited" and new_body is not None:
         conn.execute(
             "UPDATE send_drafts SET body_text=?, review_state='edited', "
-            "updated_at=CURRENT_TIMESTAMP WHERE id=?",
-            (new_body, draft_id),
+            "comment=COALESCE(?, comment), updated_at=CURRENT_TIMESTAMP WHERE id=?",
+            (new_body, comment, draft_id),
         )
     else:
         conn.execute(
             "UPDATE send_drafts SET review_state=?, "
-            "updated_at=CURRENT_TIMESTAMP WHERE id=?",
-            (state, draft_id),
+            "comment=COALESCE(?, comment), updated_at=CURRENT_TIMESTAMP WHERE id=?",
+            (state, comment, draft_id),
         )
     conn.commit()
     return True

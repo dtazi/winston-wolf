@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS send_drafts (
         CHECK (review_state IN ('pending','approved','edited','rejected','delivered')),
     scheduled_send_at TIMESTAMP,
     delivered_send_id TEXT REFERENCES sends(id),
+    comment TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

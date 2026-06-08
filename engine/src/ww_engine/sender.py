@@ -8,6 +8,7 @@ network in unit/integration tests; engine never hard-couples to Graph).
 from __future__ import annotations
 
 import os
+import re
 import sqlite3
 import uuid
 from datetime import datetime, timezone
@@ -16,24 +17,42 @@ from zoneinfo import ZoneInfo
 
 from . import logging
 
-# Single configured US-business-hours window (FR-016/017). Env-overridable.
-_TZ = ZoneInfo(os.environ.get("WW_SEND_TZ", "America/New_York"))
+# Per-recipient send window (D2): recipient-local 10am-2pm, Tue-Thu. The default
+# timezone is used only when a lead has no derived send_timezone.
+DEFAULT_TZ = os.environ.get("WW_SEND_TZ", "America/New_York")
 _DAYS = {1, 2, 3}  # Tue, Wed, Thu (Mon=0)
-_HOUR_START = int(os.environ.get("WW_SEND_HOUR_START", "9"))
-_HOUR_END = int(os.environ.get("WW_SEND_HOUR_END", "11"))
-_TRACK_BASE = os.environ.get("WW_TRACKING_BASE_URL", "https://track.example.com")
+_HOUR_START = int(os.environ.get("WW_SEND_HOUR_START", "10"))
+_HOUR_END = int(os.environ.get("WW_SEND_HOUR_END", "14"))
+_TRACK_BASE = os.environ.get(
+    "WW_TRACKING_BASE_URL", "https://track.richbondgroup.eu")
+
+_URL_RE = re.compile(r'https?://[^\s<>"\')]+')
 
 
-def in_send_window(now: datetime | None = None) -> bool:
-    now = (now or datetime.now(_TZ)).astimezone(_TZ)
+def resolve_tz(name: str | None) -> ZoneInfo:
+    """A lead's send timezone, falling back to the default on unknown/empty."""
+    if name:
+        try:
+            return ZoneInfo(name)
+        except Exception:  # noqa: BLE001 - bad tz string must not crash a send
+            pass
+    return ZoneInfo(DEFAULT_TZ)
+
+
+def in_send_window(now: datetime | None = None,
+                   tz: str | ZoneInfo | None = None) -> bool:
+    zone = tz if isinstance(tz, ZoneInfo) else resolve_tz(tz)
+    now = (now or datetime.now(zone)).astimezone(zone)
     return now.weekday() in _DAYS and _HOUR_START <= now.hour < _HOUR_END
 
 
-def next_window_slot(now: datetime | None = None) -> str:
-    """First moment >= now that is inside the window (UTC ISO string)."""
+def next_window_slot(now: datetime | None = None,
+                     tz: str | ZoneInfo | None = None) -> str:
+    """First moment >= now inside the recipient-local window (UTC string)."""
     from datetime import timedelta
 
-    cur = (now or datetime.now(_TZ)).astimezone(_TZ)
+    zone = tz if isinstance(tz, ZoneInfo) else resolve_tz(tz)
+    cur = (now or datetime.now(zone)).astimezone(zone)
     for _ in range(0, 24 * 14):  # search up to two weeks of hours
         if cur.weekday() in _DAYS and _HOUR_START <= cur.hour < _HOUR_END:
             break
@@ -96,13 +115,36 @@ class GraphTransport:
                 "internet_message_id": ""}
 
 
-def _html(body_text: str, pixel_token: str, marker_token: str = "") -> str:
-    pixel = f'<img src="{_TRACK_BASE}/pixel/{pixel_token}" width="1" height="1" alt="">'
-    paras = "".join(f"<p>{ln}</p>" for ln in body_text.splitlines() if ln.strip())
+def _html(body_text: str, pixel_token: str, marker_token: str = "",
+          link_map: dict[str, str] | None = None) -> str:
+    # Open-pixel at the tracker's real route (/p/<token>.gif — D10).
+    pixel = f'<img src="{_TRACK_BASE}/p/{pixel_token}.gif" width="1" height="1" alt="">'
+    link_map = link_map or {}
+
+    def _linkify(line: str) -> str:
+        def repl(m: re.Match) -> str:
+            url = m.group(0)
+            click = link_map.get(url)
+            return f'<a href="{click}">{url}</a>' if click else url
+        return _URL_RE.sub(repl, line)
+
+    paras = "".join(f"<p>{_linkify(ln)}</p>"
+                    for ln in body_text.splitlines() if ln.strip())
     # Invisible HTML comment carrying the marker so quoted replies still let
     # the detector match (FR-009c). Comments survive in most reply clients.
     marker = f"<!-- ww-marker: {marker_token} -->" if marker_token else ""
     return f"<html><body>{paras}{pixel}{marker}</body></html>"
+
+
+def _build_link_map(body_text: str) -> dict[str, tuple[str, str]]:
+    """{original_url: (click_token, click_url)} for each distinct URL (D10).
+    Tokens are pre-generated so the body can be wrapped before the send; the
+    tracked_links rows are inserted after the sends row (FK) in deliver_draft."""
+    out: dict[str, tuple[str, str]] = {}
+    for url in dict.fromkeys(_URL_RE.findall(body_text)):  # de-dup, keep order
+        token = uuid.uuid4().hex
+        out[url] = (token, f"{_TRACK_BASE}/c/{token}")
+    return out
 
 
 def deliver_draft(conn: sqlite3.Connection, draft: sqlite3.Row,
@@ -113,10 +155,16 @@ def deliver_draft(conn: sqlite3.Connection, draft: sqlite3.Row,
     pixel_token = uuid.uuid4().hex
     marker = draft["id"]  # the draft id doubles as the unique X-WW-Send marker
 
+    # Wrap outbound links through the click redirector (D10). Tokens generated
+    # now so the body carries them; tracked_links rows inserted after the send.
+    links = _build_link_map(draft["body_text"])
+    href_map = {url: click for url, (_tok, click) in links.items()}
+
     message = {
         "subject": draft["subject"],
         "body": {"contentType": "HTML",
-                 "content": _html(draft["body_text"], pixel_token, marker)},
+                 "content": _html(draft["body_text"], pixel_token, marker,
+                                  href_map)},
         "toRecipients": [{"emailAddress": {"address": _lead_email(conn, draft["lead_id"])}}],
         "internetMessageHeaders": [{"name": "X-WW-Send", "value": marker}],
     }
@@ -135,6 +183,13 @@ def deliver_draft(conn: sqlite3.Connection, draft: sqlite3.Row,
          draft["value_angle"], draft["message_recipe"], marker,
          sent.get("conversation_id"), sent.get("internet_message_id")),
     )
+    # tracked_links after the sends row exists (FK send_id).
+    for url, (token, _click) in links.items():
+        conn.execute(
+            "INSERT INTO tracked_links (id, send_id, lead_id, original_url) "
+            "VALUES (?,?,?,?)",
+            (token, send_id, draft["lead_id"], url),
+        )
     conn.execute(
         "INSERT INTO events (lead_id, send_id, event_type, timestamp, payload) "
         "VALUES (?,?,'sent',?,?)",
@@ -146,7 +201,9 @@ def deliver_draft(conn: sqlite3.Connection, draft: sqlite3.Row,
         "updated_at=CURRENT_TIMESTAMP WHERE id=?",
         (send_id, draft["id"]),
     )
-    seq = "completed" if draft["touch_number"] >= 3 else "active"
+    from . import selection
+    max_touches, _gap = selection.campaign_sequencing(conn, draft["campaign_id"])
+    seq = "completed" if draft["touch_number"] >= max_touches else "active"
     conn.execute(
         "UPDATE leads SET current_touch=?, sequence_state=?, "
         "updated_at=CURRENT_TIMESTAMP WHERE id=?",

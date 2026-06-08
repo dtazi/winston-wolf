@@ -8,10 +8,18 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from . import cost, db, logging, modes, rotation, runs, selection, sender
+import dataclasses
+import json as _json
+
+from . import (
+    cost, db, feedback, intake, knowledge, logging, modes, research, rotation,
+    runs, selection, sender,
+)
 from .drafting import personalization
 from .drafting.base import DraftError, DraftRequest, Drafter
 from .drafting.claude_code import ClaudeCodeDrafter
+from .drafting.grounded import GroundedClaudeDrafter
+from .research import Researcher
 
 app = typer.Typer(help="Winston Wolf outreach campaign engine.")
 console = Console()
@@ -119,6 +127,160 @@ def run_deliver(conn, campaign: str, transport: sender.Transport,
     return counts
 
 
+def run_experiment_draft(conn, campaign: str, batch: int,
+                         researcher: Researcher, drafter: Drafter,
+                         tenant: str = "richbond") -> dict:
+    """004 nightly pass (D6/D7): research each eligible lead, draft grounded in
+    the KB + strategy library + research + conclusions + feedback, write a
+    reasoning note + a review file. Testable without Typer."""
+    customer_id, mode = _campaign_ctx(conn, campaign)
+    kb = knowledge.load_kb(tenant)
+    strategies = knowledge.load_strategies()
+    conclusions = knowledge.load_conclusions(tenant)
+    comments = knowledge.recent_comments(conn, campaign)
+    with runs.run(conn, campaign, "draft") as counts:
+        counts.update(drafted=0, researched=0, skipped=0)
+        for lead in selection.eligible_leads(conn, campaign, limit=batch):
+            next_touch = (lead["current_touch"] or 0) + 1
+            live = conn.execute(
+                "SELECT 1 FROM send_drafts WHERE lead_id=? AND touch_number=? "
+                "AND review_state!='rejected'", (lead["id"], next_touch),
+            ).fetchone()
+            if live:  # idempotency (FR-005)
+                continue
+            ld = dict(lead)
+            ld["person_name"] = " ".join(
+                x for x in [ld.get("person_first_name"),
+                            ld.get("person_last_name")] if x).strip()
+
+            try:
+                res_obj = researcher.research(ld)
+                research.store_research(conn, lead["id"], res_obj)
+                counts["researched"] += 1
+            except research.ResearchError as exc:
+                res_obj = research.ResearchResult()  # thin, never invented
+                logging.log("research_skip", campaign_id=campaign,
+                            lead_id=lead["id"], reason=type(exc).__name__)
+
+            tier = selection.engagement_tier(conn, lead["id"]) \
+                if next_touch > 1 else ""
+            pers = personalization.gather(ld)
+            req = DraftRequest(
+                lead=ld, pitch={}, brief_excerpt={}, value_angle="grounded",
+                touch_number=next_touch, personalization=pers,
+                knowledge_base=kb, strategies=strategies,
+                research=dataclasses.asdict(res_obj), conclusions=conclusions,
+                feedback=comments, engagement_tier=tier)
+            try:
+                drafted = drafter.draft(req)
+            except DraftError as exc:
+                counts["skipped"] += 1
+                logging.log("draft_skip", campaign_id=campaign,
+                            lead_id=lead["id"], reason=type(exc).__name__)
+                continue
+
+            draft_id = __import__("uuid").uuid4().hex
+            state = "approved" if mode == "autonomous" else "pending"
+            slot = sender.next_window_slot(tz=lead["send_timezone"])
+            conn.execute(
+                """INSERT INTO send_drafts (id, customer_id, campaign_id,
+                       lead_id, touch_number, value_angle, subject, body_text,
+                       body_text_original, message_recipe, personalization_level,
+                       review_state, scheduled_send_at)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (draft_id, customer_id, campaign, lead["id"], next_touch,
+                 "grounded", drafted.subject, drafted.body_text,
+                 drafted.body_text, _json.dumps(drafted.message_recipe),
+                 pers["level"], state, slot))
+            for u in drafted.token_usage:
+                cost.record(conn, customer_id=customer_id, campaign_id=campaign,
+                            stage=u.get("stage", "drafting"),
+                            model=u.get("model", "unknown"),
+                            input_tokens=int(u.get("input_tokens", 0)),
+                            output_tokens=int(u.get("output_tokens", 0)),
+                            lead_id=lead["id"], send_draft_id=draft_id)
+            conn.commit()
+            feedback.write_review_file(
+                {"id": draft_id, "touch_number": next_touch,
+                 "lead_id": lead["id"], "subject": drafted.subject,
+                 "body_text": drafted.body_text,
+                 "message_recipe": _json.dumps(drafted.message_recipe)}, res_obj)
+            counts["drafted"] += 1
+            logging.log("draft", campaign_id=campaign, lead_id=lead["id"],
+                        send_id=draft_id, touch=next_touch,
+                        personalization_level=pers["level"])
+    return counts
+
+
+def run_experiment_deliver(conn, campaign: str, transport: sender.Transport,
+                           now=None) -> dict:
+    """004 deliver pass: per-recipient-local window; manual-flag suppression via
+    is_still_eligible (no detector/freshness guard — D4)."""
+    _campaign_ctx(conn, campaign)
+    now_str = __import__("datetime").datetime.now(
+        __import__("datetime").timezone.utc).replace(
+        tzinfo=None).isoformat(sep=" ", timespec="seconds")
+    with runs.run(conn, campaign, "deliver") as counts:
+        counts.update(delivered=0, skipped=0)
+        rows = conn.execute(
+            "SELECT d.*, l.send_timezone AS lead_tz FROM send_drafts d "
+            "JOIN leads l ON l.id=d.lead_id WHERE d.campaign_id=? "
+            "AND d.review_state IN ('approved','edited') "
+            "AND (d.scheduled_send_at IS NULL OR d.scheduled_send_at<=?)",
+            (campaign, now_str)).fetchall()
+        for d in rows:
+            if not sender.in_send_window(now, tz=d["lead_tz"]):
+                counts["skipped"] += 1
+                logging.log("deliver_skip", campaign_id=campaign,
+                            lead_id=d["lead_id"], reason="outside_window")
+                continue
+            if not selection.is_still_eligible(conn, d["lead_id"]):  # FR-016/017
+                counts["skipped"] += 1
+                logging.log("deliver_skip", campaign_id=campaign,
+                            lead_id=d["lead_id"], reason="ineligible")
+                continue
+            sender.deliver_draft(conn, d, transport)
+            counts["delivered"] += 1
+    return counts
+
+
+@app.command("import-prospects")
+def import_prospects(file: Path = typer.Argument(...),
+                     campaign: str = typer.Option(..., "--campaign"),
+                     db_path: Path = _DB) -> None:
+    """Import a hand-built prospect list (YAML) into the campaign (D8)."""
+    conn = db.get_connection(db_path)
+    try:
+        if not file.exists():
+            console.print(f"[red]No such file:[/red] {file}")
+            raise typer.Exit(1)
+        res = intake.import_prospects(conn, file, campaign)
+    finally:
+        conn.close()
+    console.print(f"[green]Imported[/green] {res['imported']} "
+                  f"(skipped {res['skipped']}).")
+
+
+@app.command()
+def configure(campaign: str = typer.Option(..., "--campaign"),
+              max_touches: int = typer.Option(2, "--max-touches"),
+              gap_days: int = typer.Option(7, "--gap-days"),
+              db_path: Path = _DB) -> None:
+    """Set the experiment campaign's sequencing config (D3): 2 touches, 7-day gap."""
+    conn = db.get_connection(db_path)
+    try:
+        conn.execute(
+            "UPDATE campaigns SET max_touches=?, touch_gap_days=? WHERE id=?",
+            (max_touches, gap_days, campaign))
+        conn.commit()
+        logging.log("configure", campaign_id=campaign,
+                    max_touches=max_touches, touch_gap_days=gap_days)
+    finally:
+        conn.close()
+    console.print(f"[green]Configured[/green] {campaign}: "
+                  f"{max_touches} touches, {gap_days}-day gap.")
+
+
 @app.command()
 def init(db_path: Path = _DB) -> None:
     """Apply idempotent engine migrations."""
@@ -181,10 +343,12 @@ def enroll(
 def draft(campaign: str = typer.Option(..., "--campaign"),
           batch: int = typer.Option(15, "--batch"),
           db_path: Path = _DB) -> None:
-    """Draft pass: select eligible leads and draft their next touch."""
+    """Nightly pass: research each eligible lead and draft a grounded next touch."""
     conn = db.get_connection(db_path)
     try:
-        counts = run_draft(conn, campaign, batch, ClaudeCodeDrafter())
+        counts = run_experiment_draft(
+            conn, campaign, batch,
+            research.ClaudeCodeResearcher(), GroundedClaudeDrafter())
     finally:
         conn.close()
     console.print(f"[green]Draft pass[/green]: {counts}")
@@ -192,28 +356,56 @@ def draft(campaign: str = typer.Option(..., "--campaign"),
 
 @app.command()
 def review(campaign: str = typer.Option(..., "--campaign"),
+           draft_id: str = typer.Option(None, "--draft"),
+           verdict: str = typer.Option(None, "--verdict",
+                                       help="approve | edit | reject"),
+           comment: str = typer.Option(None, "--comment"),
+           body_file: Path = typer.Option(None, "--body"),
            db_path: Path = _DB) -> None:
-    """List pending drafts with full bodies and thin-personalization flags."""
+    """Morning review (D1). No --draft → list pending + review-file paths.
+    With --draft + --verdict → record the decision and an optional comment."""
     conn = db.get_connection(db_path)
     try:
+        if draft_id and verdict:
+            state = {"approve": "approved", "edit": "edited",
+                     "reject": "rejected"}.get(verdict)
+            if not state:
+                console.print(f"[red]Bad verdict:[/red] {verdict}")
+                raise typer.Exit(1)
+            body = None
+            if state == "edited":
+                if not body_file or not body_file.exists():
+                    console.print("[red]edit needs --body <file>[/red]")
+                    raise typer.Exit(1)
+                body = body_file.read_text(encoding="utf-8")
+            ok = modes.set_review_state(conn, draft_id, state, body, comment)
+            if ok:
+                logging.log("review_decision", send_id=draft_id,
+                            decision=state, has_comment=bool(comment))
+            if not ok:
+                console.print("[red]Draft missing or already finalized.[/red]")
+                raise typer.Exit(1)
+            console.print(f"[green]{state}[/green] {draft_id}")
+            return
+
         rows = conn.execute(
             "SELECT * FROM send_drafts WHERE campaign_id=? AND "
-            "review_state='pending' ORDER BY created_at",
-            (campaign,),
+            "review_state='pending' ORDER BY created_at", (campaign,),
         ).fetchall()
     finally:
         conn.close()
     if not rows:
         console.print("[yellow]No pending drafts.[/yellow]")
         return
+    rdir = feedback.reviews_dir()
     for r in rows:
-        flag = " [red](THIN PERSONALIZATION)[/red]" if \
+        flag = " [red](THIN)[/red]" if \
             r["personalization_level"] == "thin" else ""
         console.print(
             f"\n[bold]{r['id']}[/bold] · lead {r['lead_id']} · touch "
-            f"{r['touch_number']} · angle {r['value_angle']}{flag}")
+            f"{r['touch_number']}{flag}")
         console.print(f"[dim]Subject:[/dim] {r['subject']}")
-        console.print(r["body_text"])
+        console.print(f"[dim]Review file:[/dim] {rdir / (r['id'] + '.md')}")
 
 
 @app.command()
@@ -276,10 +468,10 @@ def _decide(db_path: Path, draft_id: str, state: str,
 @app.command()
 def deliver(campaign: str = typer.Option(..., "--campaign"),
             db_path: Path = _DB) -> None:
-    """Deliver approved drafts — inside the send window only."""
+    """Deliver approved drafts — each in the recipient's local window."""
     conn = db.get_connection(db_path)
     try:
-        counts = run_deliver(conn, campaign, sender.GraphTransport())
+        counts = run_experiment_deliver(conn, campaign, sender.GraphTransport())
     finally:
         conn.close()
     console.print(f"[green]Deliver pass[/green]: {counts}")
@@ -296,6 +488,39 @@ def detect(campaign: str = typer.Option(..., "--campaign"),
     finally:
         conn.close()
     console.print(f"[green]Detect pass[/green]: {counts}")
+
+
+@app.command("flag-replied")
+def flag_replied(lead: str = typer.Option(..., "--lead"),
+                 category: str = typer.Option(
+                     "other", "--category",
+                     help="interested|not-interested|wrong-person|ooo|other"),
+                 db_path: Path = _DB) -> None:
+    """Manually mark a prospect as replied (D4, Article 15): record the reply,
+    halt outreach, void pending drafts. NEVER reads the reply content."""
+    conn = db.get_connection(db_path)
+    try:
+        row = conn.execute("SELECT id FROM leads WHERE id=?", (lead,)).fetchone()
+        if not row:
+            console.print(f"[red]No such lead:[/red] {lead}")
+            raise typer.Exit(1)
+        conn.execute(
+            "INSERT INTO events (lead_id, event_type, timestamp, payload) "
+            "VALUES (?, 'replied', CURRENT_TIMESTAMP, ?)",
+            (lead, _json.dumps({"category": category, "source": "manual_flag"})))
+        conn.execute(
+            "UPDATE leads SET sequence_state='halted_reply', "
+            "updated_at=CURRENT_TIMESTAMP WHERE id=?", (lead,))
+        conn.execute(
+            "UPDATE send_drafts SET review_state='rejected', "
+            "updated_at=CURRENT_TIMESTAMP WHERE lead_id=? AND "
+            "review_state IN ('pending','approved','edited')", (lead,))
+        conn.commit()
+        logging.log("flag_replied", lead_id=lead, category=category)
+    finally:
+        conn.close()
+    console.print(f"[green]Flagged replied[/green] {lead} ({category}) — "
+                  "outreach halted.")
 
 
 @app.command("go-autonomous")

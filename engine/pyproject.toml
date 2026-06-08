@@ -6,6 +6,7 @@ requires-python = ">=3.11"
 dependencies = [
     "ww-core",
     "ww-outreach",
+    "ww-llm",
     "typer>=0.12",
     "rich>=13.0",
     "requests>=2.31",
@@ -19,6 +20,7 @@ dev = [
 [tool.uv.sources]
 ww-core = { path = "../core", editable = true }
 ww-outreach = { path = "../outreach", editable = true }
+ww-llm = { path = "../llm", editable = true }
 
 [project.scripts]
 ww-engine = "ww_engine.cli:app"

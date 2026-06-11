@@ -3,7 +3,7 @@
 **Feature branch:** `004-proof-of-life-experiment`
 **Spec:** [spec.md](./spec.md)
 **Created:** 2026-06-08
-**Status:** Draft — plan gate (awaiting operator review)
+**Status:** Implemented — pre-flight (engine built + tested; live send pending `richbond.ma` auth). Last updated 2026-06-11.
 
 ---
 

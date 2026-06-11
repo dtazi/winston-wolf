@@ -1,7 +1,8 @@
 <!-- SPECKIT START -->
-Active feature: **004-proof-of-life-experiment**. For scope and intent,
-read `specs/004-proof-of-life-experiment/spec.md`. Plan/tasks not yet
-written (spec gate pending operator review).
+Active feature: **004-proof-of-life-experiment** (Status: implemented —
+pre-flight; live send pending `richbond.ma` auth). For scope and intent,
+read `specs/004-proof-of-life-experiment/spec.md`; plan + tasks exist in
+the same folder.
 <!-- SPECKIT END -->
 
 <!-- KNOWLEDGE START -->

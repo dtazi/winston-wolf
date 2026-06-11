@@ -2,6 +2,13 @@
 
 **Branch:** `004-proof-of-life-experiment` · **Spec/Plan/Contracts:** this folder.
 
+> **Status (2026-06-11):** T001–T036 IMPLEMENTED — engine built, 46 tests green, the
+> grounded drafter offline-smoke-validated (`engine/ops/smoke_draft.py`). Per-checkbox
+> states below are not individually maintained; the authoritative status is here + the
+> spec header. **Remaining: T037** (operator pre-flight — `richbond.ma` auth + a live
+> draft→review→deliver smoke to a test address). Scouting the real prospect list is the
+> deliberately-last step, after T037.
+
 Legend: `[P]` = parallelizable (different files, no ordering dep) · `[USx]` = user story.
 Most work **extends** the existing `ww-engine` (002) — tasks say NEW vs CHANGE.
 Tests precede implementation per Article 8.

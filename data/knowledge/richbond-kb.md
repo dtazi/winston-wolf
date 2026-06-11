@@ -2,53 +2,77 @@
 
 > Every factual claim or offer in a draft MUST cite an anchor from this file.
 > Anything marked **[UNCONFIRMED]** must be emitted `grounded:false` (flagged at
-> approval) — never asserted as fact. Operator: replace the [UNCONFIRMED] blocks
-> with verified figures to unlock stronger, fully-grounded copy.
+> approval) — never asserted as fact.
+> Sources: richbondgroup.eu/en (EU/export site), richbond.ma/a-propos,
+> grouperichbond.ma/fr — fetched 2026-06-09. US-legal TAA facts: deep-research run
+> wf_7bb356a7-007.
 
-## company
-- **Richbond** — Moroccan institutional mattress & bedding manufacturer, ~60 years
-  in operation. Serves institutional bulk buyers across hospitality, healthcare,
-  education, and government.
-- Operates **Simmons** and **Beautyrest** manufacturing under license in Morocco,
-  and **Silentnight** manufacturing in Kenya. *(anchor: brand-portfolio)*
-- Vertically integrated: in-house foam, fabric, and finishing — single-source
-  accountability across the bill of materials; faster customization than typical
-  Asian-factory cycles. *(anchor: vertical-integration)*
+## company  *(anchor: company)*
+- **Richbond SA** — Moroccan bedding & furniture manufacturer, founded **1964/1965**
+  (~60 years); positions as market **leader since 1964**. HQ: Casablanca, Morocco.
+- Scale (proxies for institutional capacity): **~1,800 employees** (+~3,600 indirect
+  jobs), **~800M MAD annual revenue**, **5 production sites in Casablanca**, 6
+  distribution centers, ~200 delivery trucks daily, ~1,300 sales points in Morocco.
+  *(anchor: scale)*
 
-## offer / value props
-- **Durability under institutional load** — institutions cycle bedding 3–5× faster
-  than residential use; Richbond builds to that load. *(anchor: durability)*
-- **Total cost of ownership** — lower lifetime cost-per-bed-night than commodity
-  imports, not just unit price. *(anchor: tco)*
-- **China + 1 / supply diversification** — Morocco manufacturing as a direct
-  alternative for buyers exposed to China tariffs, lead-time variance, and political
-  risk. *(anchor: china-plus-one)*
-- **Regulatory / fire-safety fit** — healthcare and dorm bedding meets flammability
-  and material requirements. *(anchor: fire-safety — see [UNCONFIRMED] standards)*
+## brand portfolio  *(anchor: brand-portfolio)*
+- **Simmons** — manufactured/operated by Richbond (confirmed on grouperichbond.ma; the
+  Simmons spring-mattress brand, "150 years"). **This is the strongest, fully-sourced
+  brand fact.**
+- Own sub-brands: **RHC, SOFTISSIMO, SOFTISUN, Mesidor**.
+- **[UNCONFIRMED — operator to confirm] Beautyrest (Morocco) and Silentnight (Kenya)** —
+  these are in the operator's brief but are NOT named on Richbond's public sites. Do NOT
+  assert them as fact until confirmed. If confirmed, they become permitted brand names.
 
-## trade / origin status (verified — deep-research run wf_7bb356a7-007, 2026-06-09)
-- **Morocco is a TAA-designated Free Trade Agreement country** — FAR 52.225-5 names
-  Morocco verbatim; VA OPAL lists it among FTA designated countries. US–Morocco FTA
-  in force since 2006. *(anchor: taa-designated)*
-- This makes Richbond **federally eligible** (US federal / VA / military) **conditional
-  on** (a) certifying *substantial transformation* in Morocco and (b) the buy clearing
-  the ~$100K FTA supplies threshold. Do NOT claim federal eligibility as automatic.
-  *(anchor: taa-conditional)*
+## what Richbond makes  *(anchor: products)*
+- Vertically integrated across **fabrics, foam, mattresses, bedding, and furniture** —
+  in-house, single-source accountability, faster customization than typical Asian-factory
+  cycles. *(anchor: vertical-integration — confirmed on richbondgroup.eu)*
+- Product lines: mattresses, pillows, bed linen, banquettes/sofas (spring & foam).
 
-## proof points — [UNCONFIRMED] — operator to verify before any grounded claim
-- **[UNCONFIRMED] certifications** — fire-safety / material standards Richbond actually
-  holds (candidates: CertiPUR-US, UL, BS 7177, CAL 117, BS 7176). List only the ones
-  held, with cert numbers if available.
-- **[UNCONFIRMED] reference accounts** — named institutional customers OK to reference
-  in cold email (hospitality group / healthcare / military), with permission level
-  (named vs anonymized "a major MENA hotel group").
-- **[UNCONFIRMED] production capacity** — units / unit-equivalents per month, and lead
-  time to a US East Coast port.
-- **[UNCONFIRMED] US logistics** — any US warehousing, distribution partner, or
-  freight lead-time figures that make Richbond credible to a US buyer.
+## hospitality credibility  *(anchor: hospitality)*
+- Richbond group runs a dedicated **hotel-furnishing / fit-out division**
+  ("agencement hôtelier") and owns/operates the **Adagio Casablanca City Center**
+  aparthotel — i.e. real, on-record institutional-hospitality experience, not a claim
+  invented for outreach. **Strong anchor for hospitality FF&E prospects.**
+
+## certifications  *(anchor: certifications)*
+- **Confirmed (richbondgroup.eu):** **ISO 9001** (quality), **FSC**, **REACH**.
+- **[UNCONFIRMED] fire-safety / flammability standards** (e.g. BS 7177/7176, CAL 117,
+  UL, CertiPUR-US) — NOT stated on the sites. Operator to confirm which are held, with
+  numbers. Until then, do not claim fire-safety certification.
+
+## export / origin  *(anchor: export)*
+- Supplies "major retailers and distributors worldwide" (UNNAMED — do not invent names);
+  active EU market (richbondgroup.eu); Côte d'Ivoire operation since 2019. Tagline:
+  products "comply with the legal requirements in your market."
+
+## trade / origin status (US-legal — verified, run wf_7bb356a7-007)
+- **Morocco is a TAA-designated FTA country** — FAR 52.225-5 names Morocco; VA OPAL lists
+  it. US–Morocco FTA in force since 2006. *(anchor: taa-designated)*
+- Makes Richbond **federally eligible** (US federal / VA / military) **conditional on**
+  certifying *substantial transformation* in Morocco and the buy clearing the ~$100K FTA
+  supplies threshold. Never claim federal eligibility as automatic. *(anchor: taa-conditional)*
+
+## offer framing (logic, not invented numbers)
+- **Durability under institutional load** — institutions cycle bedding 3–5× faster than
+  residential; build accordingly. *(anchor: durability)*
+- **Total cost of ownership** — lower lifetime cost-per-bed-night than commodity imports.
+  *(anchor: tco)*
+- **China + 1 / supply diversification** — Morocco origin as a tariff/lead-time/geo-risk
+  alternative to China. *(anchor: china-plus-one)*
+
+## still [UNCONFIRMED] — operator to supply
+- **Named reference accounts** OK to cite (hospitality / healthcare), + permission level.
+- **Fire-safety certifications** actually held (see certifications).
+- **Production capacity** in units/unit-equivalents per month; lead time to a US East
+  Coast port.
+- **US logistics** — any US warehousing / distribution partner / freight lead-times.
+- **Beautyrest / Silentnight** confirmation (see brand portfolio).
 
 ## hard guards
-- Named-account guard remains in force (no naming protected accounts, e.g. IKEA).
-- No claim about a competitor's product. No price quotes in cold email — frame TCO,
-  not unit price.
-- Anything not anchored above is **not** a fact the drafter may assert.
+- Named-account guard in force (no naming protected/named customers, e.g. IKEA, named
+  hotel chains, named hospitals). Permitted brand names: Simmons, RHC, SOFTISSIMO,
+  SOFTISUN, Mesidor (+ Beautyrest/Silentnight ONLY once confirmed).
+- No competitor claims. No price quotes in cold email — frame TCO, not unit price.
+- Anything not anchored above is not a fact the drafter may assert.

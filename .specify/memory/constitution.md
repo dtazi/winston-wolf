@@ -284,3 +284,20 @@ motion works. Spend is earned by signal, not assumed up front.
 This is a cost-discipline gate, not a permanent ban: once a 
 bounded test validates the motion, investing to scale it is the 
 correct next step — justified by the evidence the test produced.
+
+---
+
+## Article 20 — Session Coherence
+
+At the start of each working session, before substantive work, 
+the active context MUST be re-grounded: read this constitution, 
+the active spec, the memory index, and the open task list, and 
+reconcile any contradiction before proceeding. Coherence is 
+re-checked at each milestone, before each commit, and whenever 
+the operator signals a stopping point — not deferred to an 
+undetectable "session end." Enforcement of the start-read SHOULD 
+be automated (a SessionStart hook), since a rule that depends on 
+being remembered is the failure mode this article exists to 
+prevent. The re-grounding MUST be active: it ends in either 
+"coherent — proceeding" or a specific, named reconciliation, 
+never a passive read.

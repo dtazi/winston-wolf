@@ -13,6 +13,37 @@ out of scope, stop investing + plan removal · **HOLD** = dormant, not deleted, 
 
 ---
 
+## ⚠️ SUPERSEDED IN PART BY PIVOT 2 (2026-06-08) — read this first
+
+The Instantly-layer scope below (Pivot 1, 2026-06-05) was **partially reversed three days
+later** by the proof-of-life experiment (spec `004-proof-of-life-experiment`, locked
+2026-06-08). The original entries are kept intact as the historical record and reasoning;
+this section states what is now true (per Article 18 — supersede, never silently overwrite).
+
+**Why Pivot 2 happened:** the Instantly path assumed a paid, third-party mass-send platform
+would carry deliverability. On inspection that motion was still too costly/unreliable to
+validate the core question cheaply. So we narrowed again — to the **minimum-cost test**:
+send cold outreach from a **single real Richbond mailbox (`richbond.ma`, M365 via
+`ww-outreach`)**, with **zero spend** on paid lead databases, email verification, extra
+domains, or mass-send tooling — to learn whether disciplined, researched, human-approved
+cold email produces any positive signal before investing in scale. (Now enshrined as
+constitution **Article 19 — Evidence Before Investment.**)
+
+**Reversals — these Pivot-1 dispositions no longer hold:**
+
+| Asset | Pivot-1 said | Pivot-2 truth (current) |
+|---|---|---|
+| **`ww-outreach`** (M365 Graph send/auth) | RETIRE — "cold sending = Instantly on secondary domains; cold-on-primary forbidden" | **KEEP & ACTIVE.** The pilot sends from `richbond.ma` via `ww-outreach`, under the Article 16 validation-pilot exception (human-approved, low-volume, time-boxed, primary-domain risk accepted in writing). |
+| **`ww-tracking`** (open-pixel + click redirector) | RETIRE — "Instantly owns tracking" | **KEEP & ACTIVE.** Un-retired for the experiment; opens + clicks are the engagement signal (`track.richbondgroup.eu`). |
+| **Instantly integration** (Decision 4) | Committed, behind an adapter | **DROPPED for the pilot.** No Instantly, no secondary domains, no warm-up network in 004. Revisit only if the cheap test shows signal worth scaling (Article 19). |
+| **Sending identity** = Instantly secondary domains | (dashboard rebind) | **Single real M365 mailbox.** |
+
+**Still valid from Pivot 1:** the KEEP inheritance (`ww-engine` approval gate, drafting
+seam grounded in the KB per Article 17, `ww-llm`, `ww-core`), and the manual reply
+boundary (Article 15) — the 004 reply handling is manual flagging, not an Instantly webhook.
+
+---
+
 ## KEEP — the inheritance
 
 The pivot does **not** reset to zero. The most-emphasized differentiator in the new doc —

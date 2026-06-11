@@ -1,7 +1,7 @@
 # Winston Wolf — Project Constitution
 **Project:** winston-wolf  
 **Ratification Date:** 2026-05-04  
-**Last Amended:** 2026-06-08
+**Last Amended:** 2026-06-11
 
 ---
 
@@ -242,3 +242,45 @@ MUST NOT appear as a commitment, and any unsourced or
 low-confidence claim MUST be flagged at approval rather than 
 presented as fact. The knowledge base is the single source of 
 what the tenant is authorized to say.
+
+---
+
+## Article 18 — Living Documentation
+
+The project's durable records — this constitution, specs, 
+`knowledge/`, the agent memory, and tenant knowledge bases — MUST 
+be maintained, not merely appended. A record that contradicts 
+current reality is a defect, equal in severity to broken code.
+
+- **Resolve and remove.** When an open question is answered, an 
+  experiment concluded, a task validated, or an `[UNCONFIRMED]` 
+  fact confirmed: record the outcome in the correct layer AND 
+  delete the now-stale open item, TODO, or marker. Leaving a 
+  resolved question open is a violation. (E.g. once a smoke test 
+  passes, document the result and remove the "smoke pending" item 
+  — never leave it hanging.)
+- **Supersede, never silently overwrite.** When a decision is 
+  reversed, mark the prior record *superseded* with a dated 
+  pointer to what replaced it. Reasoning and history are 
+  preserved; current truth is never left to contradict a stale 
+  entry.
+- **One source of current truth.** "What we are building now" 
+  lives in the active spec. Forward-looking ideas live in VISION; 
+  historical decisions live in their dated ledgers. Scope MUST 
+  NOT be smeared across all three.
+- **Maintenance is part of done.** A change is not complete until 
+  the records it invalidated are updated or closed in the same 
+  pass.
+
+---
+
+## Article 19 — Evidence Before Investment
+
+The motion MUST be proven with the cheapest viable tooling before 
+money is spent scaling it. No investment in paid lead databases, 
+email-verification services, additional domains, or mass-sending 
+platforms is made until a minimum-cost test produces evidence the 
+motion works. Spend is earned by signal, not assumed up front. 
+This is a cost-discipline gate, not a permanent ban: once a 
+bounded test validates the motion, investing to scale it is the 
+correct next step — justified by the evidence the test produced.

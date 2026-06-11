@@ -16,13 +16,17 @@
   *(anchor: scale)*
 
 ## brand portfolio  *(anchor: brand-portfolio)*
-- **Simmons** — manufactured/operated by Richbond (confirmed on grouperichbond.ma; the
-  Simmons spring-mattress brand, "150 years"). **This is the strongest, fully-sourced
-  brand fact.**
+Groupe Richbond — a multi-brand, pan-African institutional manufacturer (operator-confirmed
+2026-06-09). All of the following are permitted brand names:
+- **Simmons (Morocco)** — manufactured/operated under license; the Simmons spring-mattress
+  brand ("150 years"). Confirmed on grouperichbond.ma.
+- **Beautyrest (Morocco)** — operated by Groupe Richbond (operator-confirmed).
+- **Silentnight (Kenya)** — operated by Groupe Richbond (operator-confirmed).
+- **Richbond Côte d'Ivoire (Ivory Coast)** — Groupe Richbond operation (since 2019).
 - Own sub-brands: **RHC, SOFTISSIMO, SOFTISUN, Mesidor**.
-- **[UNCONFIRMED — operator to confirm] Beautyrest (Morocco) and Silentnight (Kenya)** —
-  these are in the operator's brief but are NOT named on Richbond's public sites. Do NOT
-  assert them as fact until confirmed. If confirmed, they become permitted brand names.
+- Story-level angle (true, sourced): a single group operating heritage Western bedding
+  brands (Simmons, Beautyrest, Silentnight) across Morocco, Kenya, and Côte d'Ivoire —
+  i.e. institutional scale + brand-grade specs from a China-alternative geography.
 
 ## what Richbond makes  *(anchor: products)*
 - Vertically integrated across **fabrics, foam, mattresses, bedding, and furniture** —
@@ -62,13 +66,15 @@
 - **China + 1 / supply diversification** — Morocco origin as a tariff/lead-time/geo-risk
   alternative to China. *(anchor: china-plus-one)*
 
-## still [UNCONFIRMED] — operator to supply
-- **Named reference accounts** OK to cite (hospitality / healthcare), + permission level.
-- **Fire-safety certifications** actually held (see certifications).
-- **Production capacity** in units/unit-equivalents per month; lead time to a US East
-  Coast port.
-- **US logistics** — any US warehousing / distribution partner / freight lead-times.
-- **Beautyrest / Silentnight** confirmation (see brand portfolio).
+## NOT for the cold email — discovery-call material (operator decision, 2026-06-09)
+A cold email is short, sharp, attention-catching — ONE hook, not a spec sheet. The
+following are detailed selling points that belong in the FIRST CONVERSATION after a
+reply, NOT in cold outreach. Keep them out of drafts; surface them only when a prospect
+engages. (Gather them over time for the reply-handling playbook.)
+- Fire-safety / flammability certifications actually held (BS 7177/7176, CAL 117, etc.).
+- Named reference accounts + permission level.
+- Production capacity (units/month) and lead time to a US port.
+- US logistics / warehousing / distribution footprint.
 
 ## hard guards
 - Named-account guard in force (no naming protected/named customers, e.g. IKEA, named

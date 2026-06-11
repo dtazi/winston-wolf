@@ -66,6 +66,17 @@ WHAT'S WORKING (conclusions so far):
 RECENT OPERATOR FEEDBACK (apply these lessons):
 {feedback}
 
+EMAIL REQUIREMENTS (mandatory — the experiment depends on these):
+- Include EXACTLY ONE clickable link to https://richbondgroup.eu in the body,
+  phrased as a low-friction invitation, e.g. "click here for more information"
+  or "a one-pager is here". This link is how we measure click engagement — an
+  email with no link is invalid. Put it in the body, not only the signature.
+- Sign off as:
+    Djaafar Tazi
+    Richbond Export
+- Plain text. Keep within the chosen strategy's word norm. One ask only. No price
+  unless it is in the knowledge base.
+
 Return STRICT JSON only:
 {{
   "subject": "...",

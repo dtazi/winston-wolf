@@ -30,7 +30,9 @@
 - The smoke proves the **grounded** path end-to-end: real KB + strategies →
   `GroundedClaudeDrafter` (claude CLI) → 82-word email, correct strategy selection,
   all claims grounded to KB anchors, full reasoning note. WORKS.
-- **GAP — no link in grounded output → click-tracking is dead.** Unlike the legacy
+- **RESOLVED (2026-06-09)** — grounded prompt now mandates ONE body link to
+  richbondgroup.eu ("click here for more information" style) + signature, so the
+  sender wraps it into a tracked `/c/` click. Was: no link in grounded output. Unlike the legacy
   `ClaudeCodeDrafter` (which mandated the `richbondgroup.eu` URL + signature), the 004
   `grounded.py` prompt never instructs the model to include a link. The sender only
   *wraps* existing links, so a linkless body yields no `/c/` click signal — and the

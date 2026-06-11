@@ -2,7 +2,7 @@
 
 **Feature branch:** `004-proof-of-life-experiment`
 **Created:** 2026-06-08
-**Status:** Draft — spec gate (awaiting operator review)
+**Status:** Implemented — pre-flight (engine built + tested + offline-smoke-validated; live send pending `richbond.ma` auth). Last updated 2026-06-11.
 **Supersedes:** the `004-instantly-skeleton` walking-skeleton scope
 
 ---
@@ -12,6 +12,14 @@
 This feature is a **30-day, time-boxed experiment**, not a slice of the product. It
 tests whether the thesis Winston Wolf is built on is true for Richbond *before* the
 product is built at scale.
+
+**How we got to this scope (pivot path).** WW began as a flexible multi-industry Scout
++ mass personalized send. Google/Microsoft anti-bulk measures made mass cold email
+impractical and specialist senders proved unreliable (Pivot 1 → an Instantly
+intelligence-layer, 2026-06-05). Instantly itself was too costly/unreliable to validate
+the core question cheaply, so we narrowed again (Pivot 2, 2026-06-08) to this
+**minimum-cost test**: one real mailbox, zero paid tooling, prove signal before spend
+(constitution Article 19). Full ledger: `pivot-disposition.md`.
 
 **The hypothesis (falsifiable):** Richbond can generate a meaningful number of
 qualified sales conversations per month from cold outreach when each email is the
@@ -193,6 +201,12 @@ approval gate before sending; no prospect receives more than 2 touches in the pi
 - **FR-006** Every factual claim or offer in a draft MUST be grounded in the knowledge
   base; unsourced or low-confidence claims MUST be flagged at approval, never presented
   as fact (Article 17).
+- **FR-006a** Every draft MUST contain exactly one tracked link to the Richbond site. The
+  click is a primary engagement signal (FR-016b/FR-020); a draft with no link is invalid.
+- **FR-006b** Cold-email discipline — each draft MUST lead with a single hook and one
+  low-friction ask. Detailed selling points (certifications, named references, capacity,
+  logistics) MUST NOT appear in the cold email; they are reserved for the post-reply
+  conversation.
 - **FR-007** For every draft the system MUST write a **strategy-and-reasoning note**
   recording which strategies were chosen, why for this prospect, and how applied. The
   note MUST be visible alongside the draft at approval.

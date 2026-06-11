@@ -25,3 +25,17 @@
   explicitly via `configure`).
 - Extend at the seam rather than rewrite: the 004 grounded drafter is a NEW class
   (`drafting/grounded.py`); the 002 `ClaudeCodeDrafter` stays intact.
+
+## Pre-pilot findings (offline smoke `engine/ops/smoke_draft.py`, 2026-06-09)
+- The smoke proves the **grounded** path end-to-end: real KB + strategies →
+  `GroundedClaudeDrafter` (claude CLI) → 82-word email, correct strategy selection,
+  all claims grounded to KB anchors, full reasoning note. WORKS.
+- **GAP — no link in grounded output → click-tracking is dead.** Unlike the legacy
+  `ClaudeCodeDrafter` (which mandated the `richbondgroup.eu` URL + signature), the 004
+  `grounded.py` prompt never instructs the model to include a link. The sender only
+  *wraps* existing links, so a linkless body yields no `/c/` click signal — and the
+  engagement-tiered follow-up (`clicked>opened>silent`) degrades to opened/silent only.
+  FIX before pilot: add the mandatory tracked company URL (+ decide signature identity)
+  to the grounded prompt. Pixel-open tracking still works regardless.
+- Harness footgun: import `GroundedClaudeDrafter`, NOT the legacy `ClaudeCodeDrafter`
+  (which ignores `req.knowledge_base`/`req.strategies` entirely).

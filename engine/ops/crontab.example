@@ -1,0 +1,22 @@
+# Winston Wolf — proof-of-life experiment (004) crontab
+# Install on the VPS AFTER `ww-outreach auth` has minted a richbond.ma token.
+#   1. set ENGINE_DIR + CAMPAIGN below
+#   2. crontab -e  and paste the three lines (adjust paths)
+#   3. confirm: crontab -l
+#
+# Reply detection is MANUAL (Article 15) — there is intentionally NO detect pass.
+# `review` (morning approval gate) and `flag-replied` are run by the operator, not cron.
+
+# --- edit these ---
+# ENGINE_DIR=/home/djaafar/winston-wolf/engine
+# CAMPAIGN=richbond-pilot
+# (cron has no variables — substitute the literal paths/id into the lines below)
+
+# nightly draft: research → grounded draft + reasoning note → review file (off-peak batches)
+30 2-5 * * *  cd /home/djaafar/winston-wolf/engine && uv run ww-engine draft    --campaign richbond-pilot --batch 15  >> /home/djaafar/winston-wolf/data/logs/draft.log 2>&1
+
+# hourly deliver: sends only inside each recipient's local Tue-Thu 10-14 window
+0  *   * * *  cd /home/djaafar/winston-wolf/engine && uv run ww-engine deliver   --campaign richbond-pilot                >> /home/djaafar/winston-wolf/data/logs/deliver.log 2>&1
+
+# evening conclude: turn review comments into dated observations for the next draft pass
+0  20  * * *  cd /home/djaafar/winston-wolf/engine && uv run ww-engine conclude  --campaign richbond-pilot               >> /home/djaafar/winston-wolf/data/logs/conclude.log 2>&1

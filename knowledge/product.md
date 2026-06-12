@@ -19,6 +19,22 @@ rate (unique repliers ÷ contacted) **≥5% validate / <2% kill / 2–5% iterate
   Scouting runs now as an **AI co-pilot session** (technique.md / data/scouting/).
 - **Follow-ups:** one at +7 days, **engagement-tiered, not raw-open-gated**.
 - **Reply handling:** manual flag; never read reply content (Art 15).
+- **2026-06-12 — the 30-day trial is NOT gated on any web surface.** It starts as
+  soon as T037 pre-flight passes and the prospect list is ready — it does not wait
+  for the dashboard (001) or for richbondgroup.eu landing-page work. Accepted
+  consequence: the tracked body link lands on richbondgroup.eu **as it is today**.
+- **2026-06-12 — Scout is built-as-used, not spec-frozen.** No further spec
+  investment on 003 up front; Scout capabilities grow incrementally during real
+  co-pilot scouting sessions so every piece gets practical testing immediately.
+- **2026-06-12 — CAN-SPAM, the human way.** Full-signature postal address
+  *(KB anchor: hq-address)* + one-sentence reply-to-opt-out in every email; no
+  unsubscribe links/footers. Opt-out replies → suppression list (Art 14).
+  Enforced in the grounded drafter prompt + KB hard guards.
+- **Specialist cold-email knowledge → `data/strategies/`** (operator compiling,
+  2026-06-12): craft rules from cold-email specialists land as strategy-library
+  docs (e.g. a `00-craft-*.md` read by every draft); Richbond *facts* go in the
+  KB only. The AI's per-draft strategy choice + logic lives in the reasoning
+  note (message_recipe); durable lessons accrue in `data/conclusions/richbond.md`.
 
 ## Phase-2 backlog (triggered by a validated thesis)
 - Scout tool + Hunter + enrichment — productionize the co-pilot scouting logic.

@@ -71,9 +71,14 @@ EMAIL REQUIREMENTS (mandatory — the experiment depends on these):
   phrased as a low-friction invitation, e.g. "click here for more information"
   or "a one-pager is here". This link is how we measure click engagement — an
   email with no link is invalid. Put it in the body, not only the signature.
+- Close with a one-sentence human opt-out before the signature, e.g. "If this
+  isn't relevant, just reply and tell me — I won't write again." (vary the
+  wording naturally; never an unsubscribe link or footer — CAN-SPAM is satisfied
+  the way a real salesperson would).
 - Sign off as:
     Djaafar Tazi
     Richbond Export
+    Km 7, Angle Ancienne route de Rabat et Bd Moulay Ismail, Casablanca, Morocco
 - Plain text. Keep within the chosen strategy's word norm. One ask only. No price
   unless it is in the knowledge base.
 

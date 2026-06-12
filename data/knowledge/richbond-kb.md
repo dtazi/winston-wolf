@@ -10,6 +10,10 @@
 ## company  *(anchor: company)*
 - **Richbond SA** — Moroccan bedding & furniture manufacturer, founded **1964/1965**
   (~60 years); positions as market **leader since 1964**. HQ: Casablanca, Morocco.
+- **HQ postal address** (for the email signature — CAN-SPAM physical-address
+  requirement; grouperichbond.ma/fr/contact, fetched 2026-06-12):
+  Km 7, Angle Ancienne route de Rabat et Bd Moulay Ismail, Casablanca, Morocco.
+  *(anchor: hq-address)*
 - Scale (proxies for institutional capacity): **~1,800 employees** (+~3,600 indirect
   jobs), **~800M MAD annual revenue**, **5 production sites in Casablanca**, 6
   distribution centers, ~200 delivery trucks daily, ~1,300 sales points in Morocco.
@@ -81,4 +85,9 @@ engages. (Gather them over time for the reply-handling playbook.)
   hotel chains, named hospitals). Permitted brand names: Simmons, RHC, SOFTISSIMO,
   SOFTISUN, Mesidor (+ Beautyrest/Silentnight ONLY once confirmed).
 - No competitor claims. No price quotes in cold email — frame TCO, not unit price.
+- **CAN-SPAM, the human way (operator decision, 2026-06-12):** every email carries
+  (a) a full signature block incl. the HQ postal address *(anchor: hq-address)* and
+  (b) a one-sentence human opt-out (e.g. "If this isn't relevant, just reply and tell
+  me — I won't write again"). No unsubscribe links/footers — a flagged opt-out reply
+  goes on the suppression list (Article 14) and is honored permanently.
 - Anything not anchored above is not a fact the drafter may assert.

@@ -1,71 +1,24 @@
-"""ww-scout CLI — ingest leads from public sources into the shared database."""
+"""ww-scout CLI — lead-pipeline visibility.
+
+The source-ingester framework (CMS Nursing Home Compare, etc.) was retired with
+the Pivot-2 acquisition scope (`pivot-disposition.md`). Scout is now built
+incrementally as real co-pilot scouting sessions need capabilities (operator
+decision 2026-06-12, knowledge/product.md) — recover the old ingesters from git
+history if a structured source ever returns to scope.
+"""
 
 from __future__ import annotations
-
-from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
 from . import db
-from .sources.cms_nursing_home import CMSNursingHomeIngester
 
 app = typer.Typer(
-    help="Winston Wolf Scout — discover leads from public sources."
+    help="Winston Wolf Scout — lead-pipeline visibility."
 )
 console = Console()
-
-
-_KNOWN_SOURCES = {"cms_nursing_home_compare"}
-
-
-@app.command("ingest")
-def cmd_ingest(
-    source: str = typer.Option(..., help="Source channel id (e.g. cms_nursing_home_compare)."),
-    customer: str = typer.Option(..., help="Customer id (e.g. richbond)."),
-    campaign: str = typer.Option(..., help="Campaign id (must already exist)."),
-    niche: str = typer.Option(..., help="Niche id (must match a sub-niche in the brief)."),
-    file: Path = typer.Option(..., help="Path to the source's input CSV."),
-    region_filter: Optional[str] = typer.Option(
-        None,
-        help="Comma-separated US state codes to keep (e.g. MT,WY,SD). Omit = all.",
-    ),
-) -> None:
-    """Run a source ingester and write leads into the database."""
-    if not file.exists():
-        console.print(f"[red]Input file not found: {file}[/red]")
-        raise typer.Exit(code=1)
-    if source not in _KNOWN_SOURCES:
-        console.print(
-            f"[red]Unknown source: {source}.[/red] Known: {sorted(_KNOWN_SOURCES)}"
-        )
-        raise typer.Exit(code=1)
-
-    regions = (
-        {s.strip().upper() for s in region_filter.split(",") if s.strip()}
-        if region_filter else None
-    )
-    ingester = CMSNursingHomeIngester(file, region_filter=regions)
-
-    conn = db.get_connection()
-    try:
-        inserted, skipped = db.write_leads(
-            conn,
-            customer_id=customer,
-            campaign_id=campaign,
-            niche_id=niche,
-            source_channel_id=source,
-            leads_iter=ingester.ingest(),
-        )
-    finally:
-        conn.close()
-
-    console.print(
-        f"[green]Ingested[/green] from [bold]{source}[/bold]: "
-        f"{inserted} new leads, {skipped} duplicates skipped."
-    )
 
 
 @app.command("status")
@@ -116,13 +69,6 @@ def cmd_status(
     console.print(
         f"Total: [bold]{total}[/bold] leads, [bold]{total_enriched}[/bold] with email."
     )
-
-
-@app.command("list-sources")
-def cmd_list_sources() -> None:
-    """List the source-channel ids this Scout knows how to ingest."""
-    for s in sorted(_KNOWN_SOURCES):
-        console.print(f"  - {s}")
 
 
 if __name__ == "__main__":

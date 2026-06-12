@@ -56,6 +56,43 @@ def test_deliver_outside_window_is_noop(seeded, monkeypatch):
         conn.close()
 
 
+def test_transport_failure_leaves_db_clean_for_retry(seeded, monkeypatch):
+    """Graph refusing the send (expired token, 5xx) must fail loud (Art 11)
+    with NO sends row, NO 'sent' event, and the draft still approved — so the
+    next deliver pass retries it instead of losing it or double-recording."""
+    import pytest
+
+    class RefusingTransport:
+        def send(self, message):
+            raise RuntimeError("Graph sendMail failed: 401 InvalidAuthenticationToken")
+
+    monkeypatch.setattr(sender, "in_send_window", lambda *a, **k: True)
+    monkeypatch.setattr(sender, "next_window_slot", lambda *a, **k: None)
+    conn = core_db.get_connection(seeded["db_path"])
+    try:
+        _enroll(conn)
+        cli.run_draft(conn, "camp1", 9, FakeDrafter())
+        conn.execute("UPDATE send_drafts SET review_state='approved'")
+        conn.commit()
+
+        with pytest.raises(RuntimeError, match="401"):
+            cli.run_deliver(conn, "camp1", RefusingTransport())
+
+        assert conn.execute("SELECT COUNT(*) c FROM sends").fetchone()["c"] == 0
+        assert conn.execute(
+            "SELECT COUNT(*) c FROM events WHERE event_type='sent'"
+        ).fetchone()["c"] == 0
+        states = {r["review_state"] for r in conn.execute(
+            "SELECT review_state FROM send_drafts")}
+        assert states == {"approved"}  # nothing falsely marked delivered
+        outcome = conn.execute(
+            "SELECT outcome FROM engine_runs WHERE pass='deliver' "
+            "ORDER BY id DESC LIMIT 1").fetchone()["outcome"]
+        assert outcome == "error"  # recorded, not swallowed (FR-023)
+    finally:
+        conn.close()
+
+
 def test_thin_personalization_is_flagged(seeded, monkeypatch):
     monkeypatch.setattr(sender, "next_window_slot", lambda *a, **k: None)
     conn = core_db.get_connection(seeded["db_path"])

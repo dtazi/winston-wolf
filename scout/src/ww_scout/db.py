@@ -10,12 +10,30 @@ from __future__ import annotations
 import os
 import sqlite3
 import uuid
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
-
-from .sources.base import IngestedLead
+from typing import Iterable, Optional
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+@dataclass(slots=True)
+class IngestedLead:
+    """One company-level lead for the writer. Lived in sources/base.py until the
+    ingester framework was retired (2026-06-12); kept here as the writer's input
+    contract. Person fields optional — enrichment fills them in.
+    """
+    source_record_id: str
+    company_name: str
+    company_domain: Optional[str] = None
+    company_country: Optional[str] = None
+    company_region: Optional[str] = None
+    company_size_band: Optional[str] = None
+    person_first_name: Optional[str] = None
+    person_last_name: Optional[str] = None
+    person_title: Optional[str] = None
+    person_phone: Optional[str] = None
+    notes: Optional[str] = None
 
 
 def get_data_dir() -> Path:

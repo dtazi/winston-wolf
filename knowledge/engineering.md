@@ -41,3 +41,19 @@
   to the grounded prompt. Pixel-open tracking still works regardless.
 - Harness footgun: import `GroundedClaudeDrafter`, NOT the legacy `ClaudeCodeDrafter`
   (which ignores `req.knowledge_base`/`req.strategies` entirely).
+
+## Send-path test coverage + the residual double-send window (2026-06-12)
+- `outreach/tests/` added (17 tests): Graph non-202 → loud RuntimeError with
+  status+body; dead/expired M365 session → `None` (never a crash, never an
+  empty token); token cache written 0600 only when changed; device-flow and
+  revoke error paths. Engine gained `test_transport_failure_leaves_db_clean_for_retry`
+  (47 total): a transport failure mid-deliver writes NO sends row / NO 'sent'
+  event, leaves drafts `approved` for clean retry, and records the run as
+  `error` (Art 11 / FR-023).
+- **RESIDUAL RISK (accepted for the pilot, rare):** in `deliver_draft` the DB
+  writes happen AFTER `transport.send()` with one commit at the end. If Graph
+  ACCEPTS the email and then a DB write fails (disk full, sqlite lock), the
+  draft stays `approved` and the next deliver pass would RE-SEND it — a real
+  duplicate to a real prospect. Mitigation if it ever bites: mark the draft
+  `sending` + commit BEFORE the transport call; a crash then leaves a visible
+  `sending` state for the operator to resolve instead of an auto-resend.
